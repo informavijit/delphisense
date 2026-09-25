@@ -347,6 +347,78 @@
       color: #fff;
     }
 
+    /* Report Category Cards Grid */
+    .report-categories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 20px;
+      margin: 24px 0;
+    }
+
+    .report-cat-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 22px;
+      transition: all 0.3s ease;
+    }
+
+    .report-cat-card:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .report-cat-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .report-cat-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .report-cat-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .report-cat-desc {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .report-cat-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 11.5px;
+    }
+
     /* Diagrams Styling */
     .diagram-container {
       background: rgba(11, 15, 25, 0.7);
@@ -647,11 +719,11 @@
       <li class="nav-item"><a href="#exec-summary" class="active">1. Executive Summary</a></li>
       <li class="nav-item"><a href="#system-arch">2. High-Level Architecture</a></li>
       <li class="nav-item"><a href="#data-flow">3. Data Flow Architecture</a></li>
-      <li class="nav-item"><a href="#components">4. Component Breakdown</a></li>
-      <li class="nav-item"><a href="#builtin-rules">4.5 Code Review Rules Deep-Dive</a></li>
-      <li class="nav-item"><a href="#feature-list">5. Comprehensive Features</a></li>
-      <li class="nav-item"><a href="#strengths">6. Non-Functional Strengths</a></li>
-      <li class="nav-item"><a href="#roadmap">7. Strategic Roadmap</a></li>
+      <li class="nav-item"><a href="#report-categories">4. 8 Main Report Categories</a></li>
+      <li class="nav-item"><a href="#builtin-rules">5. Code Review Rules Deep-Dive</a></li>
+      <li class="nav-item"><a href="#feature-list">6. Comprehensive Features</a></li>
+      <li class="nav-item"><a href="#strengths">7. Non-Functional Strengths</a></li>
+      <li class="nav-item"><a href="#roadmap">8. Strategic Roadmap</a></li>
     </ul>
   </aside>
 
@@ -663,11 +735,11 @@
       <div class="hero-badge-row">
         <span class="badge badge-primary">v1.0.0 Release</span>
         <span class="badge badge-emerald">Zero External Dependencies</span>
-        <span class="badge badge-purple">Standalone Engine</span>
+        <span class="badge badge-purple">8 Report Categories</span>
       </div>
       <h1 class="hero-title">DelphiSense Architecture & Technical Specification</h1>
       <p class="hero-description">
-        Comprehensive design specification and detailed code review rule catalog for the DelphiSense static analysis engine.
+        Comprehensive design specification, report taxonomy, and code review rule catalog for the DelphiSense static analysis engine.
       </p>
     </div>
 
@@ -684,17 +756,17 @@
 
       <div class="metric-card">
         <div class="metric-header">
-          <span class="metric-label">Built-in Static Rules</span>
-          <div class="metric-icon icon-green">🛡️</div>
+          <span class="metric-label">Report Categories</span>
+          <div class="metric-icon icon-purple">📊</div>
         </div>
-        <div class="metric-value">7 Core</div>
-        <div class="metric-sub">Bugs, smells, nesting & unreachable code</div>
+        <div class="metric-value">8 Core</div>
+        <div class="metric-sub">Status, Warnings, Uses, Metrics & OO</div>
       </div>
 
       <div class="metric-card">
         <div class="metric-header">
           <span class="metric-label">Target Scopes</span>
-          <div class="metric-icon icon-purple">🎯</div>
+          <div class="metric-icon icon-green">🎯</div>
         </div>
         <div class="metric-value">4 Modes</div>
         <div class="metric-sub">File, Folder, .DPR Project & Workspace</div>
@@ -726,7 +798,7 @@
         <li><strong>Zero Language Server Overhead:</strong> Requires no Delphi IDE install, `.dproj` parsing, or external toolchains.</li>
         <li><strong>Decoupled Core Engine:</strong> Built with standard TypeScript (`src/engine/`) without VS Code runtime dependencies, enabling future CLI or CI/CD integration.</li>
         <li><strong>String & Comment Neutralization:</strong> Algorithmic blanking guarantees zero false-positive matches inside string literals or multiline comments.</li>
-        <li><strong>Professional HTML Reports:</strong> Generates self-contained, offline-safe code review reports with dynamic Quality Scoring.</li>
+        <li><strong>Professional HTML Reports:</strong> Generates self-contained, offline-safe code review reports organized into 8 distinct analytical categories with dynamic Quality Scoring.</li>
       </ul>
     </section>
 
@@ -831,36 +903,153 @@ sequenceDiagram
       </div>
     </section>
 
-    <!-- 4. Component Breakdown -->
-    <section id="components" class="doc-section">
+    <!-- 4. Main Report Categories -->
+    <section id="report-categories" class="doc-section">
       <div class="section-header">
         <div class="section-num">4</div>
-        <h2 class="section-title">Detailed Component Breakdown</h2>
+        <h2 class="section-title">Main Report Categories & Key Sections</h2>
       </div>
-
-      <div class="subsection-title">4.1. Extension Entry Point (src/extension.ts)</div>
       <p>
-        Handles extension activation, registers user commands, monitors workspace settings, coordinates background progress notifications (`vscode.window.withProgress`), and manages webview preview tabs.
+        DelphiSense categorizes static analysis findings and code review insights into <strong>8 specialized report sections</strong> to ensure comprehensive visibility across all developer and architectural concerns:
       </p>
 
-      <div class="subsection-title">4.2. Target Resolution Heuristics (src/target.ts)</div>
-      <p>
-        Maps high-level target selections into verified file path lists. Filters noise directories (`.git`, `node_modules`, `__history`, `__recovery`, `bin`, `obj`) and resolves `.dpr`/`.dpk` `uses` clauses into actual disk units.
-      </p>
+      <div class="report-categories-grid">
+        <!-- Category 1 -->
+        <div class="report-cat-card">
+          <div class="report-cat-header">
+            <div class="report-cat-num">1</div>
+            <div class="report-cat-title">Status Report</div>
+          </div>
+          <div class="report-cat-desc">
+            Always generated first. Details analysis target parameters, line counts, scanned files, execution time (ms), disabled rules, and custom rule configurations.
+          </div>
+          <div class="report-cat-tags">
+            <span class="tag">Target Metadata</span>
+            <span class="tag">Rule Settings</span>
+            <span class="tag">Execution Stats</span>
+          </div>
+        </div>
 
-      <div class="subsection-title">4.3. Resilient Structural Analyzer (src/engine/structuralAnalyzer.ts)</div>
-      <p>
-        Constructs a lightweight structural representation (`ParsedUnit`) for each file. Features a line-oriented scanner that neutralizes strings and comments while leaving line and column coordinates intact:
-      </p>
-      <pre><code>// Example of blanking logic in action:
-// Raw Source:
-procedure Foo; begin ShowMessage('Exit; inside string'); end;
+        <!-- Category 2 -->
+        <div class="report-cat-card">
+          <div class="report-cat-header">
+            <div class="report-cat-num">2</div>
+            <div class="report-cat-title">General & Strong Warnings</div>
+          </div>
+          <div class="report-cat-desc">
+            Highlights critical runtime showstoppers, potential bugs, uninitialized variables, empty exception handlers, unhandled destructor calls, and dead code following Exit/raise.
+          </div>
+          <div class="report-cat-tags">
+            <span class="tag">emptyExceptFinally</span>
+            <span class="tag">deadCodeAfterExit</span>
+            <span class="tag">unassignedVariable</span>
+          </div>
+        </div>
 
-// Blanked Representation passed to rules:
-procedure Foo; begin ShowMessage('                    '); end;</code></pre>
+        <!-- Category 3 -->
+        <div class="report-cat-card">
+          <div class="report-cat-header">
+            <div class="report-cat-num">3</div>
+            <div class="report-cat-title">Optimization Report</div>
+          </div>
+          <div class="report-cat-desc">
+            Identifies performance enhancement opportunities, such as string concatenation inside loops (recommending TStringBuilder) or getter/setter method inline candidates.
+          </div>
+          <div class="report-cat-tags">
+            <span class="tag">stringConcatInLoop</span>
+            <span class="tag">inlineDirectives</span>
+            <span class="tag">LoopAllocations</span>
+          </div>
+        </div>
 
-      <!-- 4.5. Built-in Code Review Rules Deep Dive -->
-      <div class="subsection-title" id="builtin-rules">4.5. Code Review Rules Elaboration & Catalog</div>
+        <!-- Category 4 -->
+        <div class="report-cat-card">
+          <div class="report-cat-header">
+            <div class="report-cat-num">4</div>
+            <div class="report-cat-title">Code Reduction Report</div>
+          </div>
+          <div class="report-cat-desc">
+            Pinpoints dead, redundant, or unused code for refactoring. Covers unused variables, redundant boolean comparisons (e.g. <code>if X = True</code>), and unused parameters.
+          </div>
+          <div class="report-cat-tags">
+            <span class="tag">unusedVariable</span>
+            <span class="tag">redundantBoolean</span>
+            <span class="tag">unusedParameter</span>
+          </div>
+        </div>
+
+        <!-- Category 5 -->
+        <div class="report-cat-card">
+          <div class="report-cat-header">
+            <div class="report-cat-num">5</div>
+            <div class="report-cat-title">Uses Dependency Report</div>
+          </div>
+          <div class="report-cat-desc">
+            Analyzes unit <code>uses</code> clauses across interface and implementation sections. Identifies unneeded unit imports and units eligible to shift to implementation.
+          </div>
+          <div class="report-cat-tags">
+            <span class="tag">unusedUses</span>
+            <span class="tag">usesShiftToImpl</span>
+            <span class="tag">DependencyCycles</span>
+          </div>
+        </div>
+
+        <!-- Category 6 -->
+        <div class="report-cat-card">
+          <div class="report-cat-header">
+            <div class="report-cat-num">6</div>
+            <div class="report-cat-title">Metrics & Complexity</div>
+          </div>
+          <div class="report-cat-desc">
+            Measures structural code metrics per routine, including Lines of Code (LOC), block nesting depth (<code>deepNesting</code>), and Cyclomatic Decision Points (DP).
+          </div>
+          <div class="report-cat-tags">
+            <span class="tag">longMethod</span>
+            <span class="tag">deepNesting</span>
+            <span class="tag">CyclomaticDP</span>
+          </div>
+        </div>
+
+        <!-- Category 7 -->
+        <div class="report-cat-card">
+          <div class="report-cat-header">
+            <div class="report-cat-num">7</div>
+            <div class="report-cat-title">Reference & Cross-Reference</div>
+          </div>
+          <div class="report-cat-desc">
+            Maps out project identifiers, showing where specific variables, methods, or classes are declared and referenced across units, plus detecting local variable shadowing.
+          </div>
+          <div class="report-cat-tags">
+            <span class="tag">SymbolMapping</span>
+            <span class="tag">shadowedVariable</span>
+            <span class="tag">CrossUnitRefs</span>
+          </div>
+        </div>
+
+        <!-- Category 8 -->
+        <div class="report-cat-card">
+          <div class="report-cat-header">
+            <div class="report-cat-num">8</div>
+            <div class="report-cat-title">Class & Control Reports</div>
+          </div>
+          <div class="report-cat-desc">
+            Documents object-oriented design structures, verifying Pascal naming conventions (T/I/F prefixes), override keywords on virtual methods, and field access boundaries.
+          </div>
+          <div class="report-cat-tags">
+            <span class="tag">pascalNaming</span>
+            <span class="tag">missingOverride</span>
+            <span class="tag">ClassHierarchy</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Built-in Code Review Rules Deep Dive -->
+    <section id="builtin-rules" class="doc-section">
+      <div class="section-header">
+        <div class="section-num">5</div>
+        <h2 class="section-title">Code Review Rules Elaboration & Catalog</h2>
+      </div>
       <p>
         DelphiSense evaluates code using a two-tier rule engine: <strong>Built-in Rules</strong> (written in TypeScript with AST-neutral structural inspection) and <strong>Custom Workspace Rules</strong> (declarative JSON-defined regex patterns). Every rule implements the standardized <code>Rule</code> contract and generates granular <code>Finding</code> instances.
       </p>
@@ -877,7 +1066,7 @@ procedure Foo; begin ShowMessage('                    '); end;</code></pre>
           </div>
         </div>
         <div class="rule-meta-grid">
-          <div class="rule-meta-item"><strong>Category</strong><span>Code Smell</span></div>
+          <div class="rule-meta-item"><strong>Category</strong><span>Uses Report</span></div>
           <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/unusedUses.ts</span></div>
           <div class="rule-meta-item"><strong>Config Disable Key</strong><span>"unusedUses" in delphisense.rules.disabled</span></div>
         </div>
@@ -927,7 +1116,7 @@ type
           </div>
         </div>
         <div class="rule-meta-grid">
-          <div class="rule-meta-item"><strong>Category</strong><span>Code Smell</span></div>
+          <div class="rule-meta-item"><strong>Category</strong><span>Metrics & Complexity</span></div>
           <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/longMethod.ts</span></div>
           <div class="rule-meta-item"><strong>Config Setting</strong><span>delphisense.longMethod.maxLines (default: 60)</span></div>
         </div>
@@ -975,7 +1164,7 @@ end;</code></pre>
           </div>
         </div>
         <div class="rule-meta-grid">
-          <div class="rule-meta-item"><strong>Category</strong><span>Code Smell</span></div>
+          <div class="rule-meta-item"><strong>Category</strong><span>Metrics & Complexity</span></div>
           <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/deepNesting.ts</span></div>
           <div class="rule-meta-item"><strong>Config Setting</strong><span>delphisense.deepNesting.maxDepth (default: 4)</span></div>
         </div>
@@ -1027,7 +1216,7 @@ end;</code></pre>
           </div>
         </div>
         <div class="rule-meta-grid">
-          <div class="rule-meta-item"><strong>Category</strong><span>Bug</span></div>
+          <div class="rule-meta-item"><strong>Category</strong><span>Strong Warnings</span></div>
           <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/emptyExceptFinally.ts</span></div>
           <div class="rule-meta-item"><strong>Config Disable Key</strong><span>"emptyExceptFinally" in delphisense.rules.disabled</span></div>
         </div>
@@ -1070,7 +1259,7 @@ end;</code></pre>
           </div>
         </div>
         <div class="rule-meta-grid">
-          <div class="rule-meta-item"><strong>Category</strong><span>Bug</span></div>
+          <div class="rule-meta-item"><strong>Category</strong><span>Code Reduction</span></div>
           <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/deadCodeAfterExit.ts</span></div>
           <div class="rule-meta-item"><strong>Config Disable Key</strong><span>"deadCodeAfterExit" in delphisense.rules.disabled</span></div>
         </div>
@@ -1114,7 +1303,7 @@ end;</code></pre>
           </div>
         </div>
         <div class="rule-meta-grid">
-          <div class="rule-meta-item"><strong>Category</strong><span>Code Smell</span></div>
+          <div class="rule-meta-item"><strong>Category</strong><span>Metrics & Complexity</span></div>
           <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/longLine.ts</span></div>
           <div class="rule-meta-item"><strong>Config Setting</strong><span>delphisense.maxLineLength.max (default: 120)</span></div>
         </div>
@@ -1138,7 +1327,7 @@ end;</code></pre>
           </div>
         </div>
         <div class="rule-meta-grid">
-          <div class="rule-meta-item"><strong>Category</strong><span>Documentation</span></div>
+          <div class="rule-meta-item"><strong>Category</strong><span>Code Reduction</span></div>
           <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/todoComment.ts</span></div>
           <div class="rule-meta-item"><strong>Config Disable Key</strong><span>"todoComment" in delphisense.rules.disabled</span></div>
         </div>
@@ -1192,14 +1381,14 @@ end;</code></pre>
 
     </section>
 
-    <!-- 5. Features -->
+    <!-- 6. Features -->
     <section id="feature-list" class="doc-section">
       <div class="section-header">
-        <div class="section-num">5</div>
+        <div class="section-num">6</div>
         <h2 class="section-title">Comprehensive Feature List</h2>
       </div>
 
-      <div class="subsection-title">5.1. Multi-Target Analysis</div>
+      <div class="subsection-title">6.1. Multi-Target Analysis</div>
       <ul>
         <li><strong>Analyze Current File:</strong> Instant verification of the active editor file or context menu target.</li>
         <li><strong>Analyze Folder:</strong> Recursive scan of selected directory trees with automated noise folder exclusion.</li>
@@ -1207,7 +1396,7 @@ end;</code></pre>
         <li><strong>Analyze Workspace:</strong> Full scan across open workspace folders.</li>
       </ul>
 
-      <div class="subsection-title">5.2. VS Code UI Integrations</div>
+      <div class="subsection-title">6.2. VS Code UI Integrations</div>
       <ul>
         <li><strong>Problems Panel Integration:</strong> Live warnings, errors, and hints with line jump navigation.</li>
         <li><strong>Explorer Context Menus:</strong> Right-click options on `.pas`, `.dpr`, `.dpk`, and folders.</li>
@@ -1216,24 +1405,24 @@ end;</code></pre>
       </ul>
     </section>
 
-    <!-- 6. Non-Functional Strengths -->
+    <!-- 7. Non-Functional Strengths -->
     <section id="strengths" class="doc-section">
       <div class="section-header">
-        <div class="section-num">6</div>
+        <div class="section-num">7</div>
         <h2 class="section-title">Non-Functional & Architectural Strengths</h2>
       </div>
       <ul>
-        <li><strong>Zero Runtime Dependencies:</strong> Uses standard Node.js built-ins (`fs`, `path`, `os`) with a package footprint of ~34 KB.</li>
+        <li><strong>Zero Runtime Dependencies:</strong> Uses standard Node.js built-ins (`fs`, `path`, `os`) with a package footprint of ~100 KB.</li>
         <li><strong>Decoupled Core Architecture:</strong> Pure TypeScript engine isolated from VS Code APIs for CLI wrapper capability.</li>
         <li><strong>High Throughput:</strong> Scans tens of thousands of lines of code in under 100 milliseconds.</li>
         <li><strong>100% Offline Safe:</strong> HTML reports require zero external fonts, JS frameworks, or internet calls.</li>
       </ul>
     </section>
 
-    <!-- 7. Roadmap -->
+    <!-- 8. Roadmap -->
     <section id="roadmap" class="doc-section">
       <div class="section-header">
-        <div class="section-num">7</div>
+        <div class="section-num">8</div>
         <h2 class="section-title">Recommended Next-Step Roadmap</h2>
       </div>
       <ol>
