@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>DelphiSense Report — SampleUnit.pas</title>
+<style>
+
+:root {
+  --ds-bg: #f5f6f8;
+  --ds-panel: #ffffff;
+  --ds-border: #e2e5ea;
+  --ds-text: #22262b;
+  --ds-muted: #6b7280;
+  --ds-accent: #2a6fb0;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  background: var(--ds-bg);
+  color: var(--ds-text);
+  line-height: 1.5;
+}
+.ds-container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 64px; }
+
+.ds-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: var(--ds-panel);
+  border: 1px solid var(--ds-border);
+  border-radius: 10px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+}
+.ds-header-left { display: flex; align-items: center; gap: 16px; }
+.ds-logo {
+  width: 48px; height: 48px; border-radius: 10px;
+  background: linear-gradient(135deg, #2a6fb0, #1c4f80);
+  color: white; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 16px; letter-spacing: 0.5px;
+}
+.ds-header h1 { margin: 0; font-size: 20px; }
+.ds-subtitle { color: var(--ds-muted); font-size: 14px; margin-top: 2px; }
+.ds-header-right { text-align: right; font-size: 13px; }
+.ds-meta-row { display: flex; justify-content: space-between; gap: 16px; color: var(--ds-muted); }
+.ds-meta-row strong { color: var(--ds-text); }
+
+.ds-summary {
+  display: grid;
+  grid-template-columns: 140px repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.ds-score-card {
+  background: var(--ds-panel);
+  border: 1px solid var(--ds-border);
+  border-radius: 10px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 12px;
+}
+.ds-score-ring {
+  --score: 100;
+  width: 72px; height: 72px; border-radius: 50%;
+  background: conic-gradient(#2a9d4f calc(var(--score) * 1%), #e6e8eb 0);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 18px;
+}
+.ds-score-ring span {
+  background: var(--ds-panel); width: 54px; height: 54px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.ds-score-label { font-size: 12px; color: var(--ds-muted); margin-top: 8px; }
+.ds-stat-card {
+  background: var(--ds-panel);
+  border: 1px solid var(--ds-border);
+  border-top: 3px solid var(--ds-accent);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+.ds-stat-total { border-top-color: #333; }
+.ds-stat-value { font-size: 26px; font-weight: 700; }
+.ds-stat-label { font-size: 12px; color: var(--ds-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+.ds-section {
+  background: var(--ds-panel);
+  border: 1px solid var(--ds-border);
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+.ds-section h2 { font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ds-muted); margin: 0 0 16px; }
+
+.ds-bars { display: flex; flex-direction: column; gap: 10px; }
+.ds-bar-row { display: grid; grid-template-columns: 140px 1fr 40px; align-items: center; gap: 10px; font-size: 13px; }
+.ds-bar-track { background: #eef0f3; border-radius: 6px; height: 14px; overflow: hidden; }
+.ds-bar-fill { height: 100%; border-radius: 6px; }
+.ds-bar-count { text-align: right; font-weight: 600; }
+
+.ds-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ds-table th {
+  text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;
+  color: var(--ds-muted); border-bottom: 2px solid var(--ds-border); padding: 8px 10px;
+}
+.ds-table td { padding: 9px 10px; border-bottom: 1px solid var(--ds-border); vertical-align: top; }
+.ds-table tr:hover td { background: #fafbfc; }
+.ds-num { font-variant-numeric: tabular-nums; }
+.ds-file-cell { font-family: 'SF Mono', Consolas, monospace; font-size: 12.5px; }
+.ds-total-col { font-weight: 700; }
+.ds-sev-error { color: #8a1c1c; font-weight: 600; }
+.ds-sev-warning { color: #8a5a00; font-weight: 600; }
+.ds-sev-hint { color: #1c5a8a; font-weight: 600; }
+
+.ds-badge {
+  display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap;
+}
+.ds-category-chip {
+  display: inline-block; padding: 1px 8px; border: 1px solid; border-radius: 5px; font-size: 11px; font-weight: 600;
+}
+.ds-rule-id { font-family: 'SF Mono', Consolas, monospace; font-size: 12px; color: var(--ds-muted); }
+
+.ds-file-block { margin-top: 22px; }
+.ds-file-block h3 { font-size: 14px; margin: 0 0 8px; font-family: 'SF Mono', Consolas, monospace; }
+.ds-file-fullpath { font-family: -apple-system, Segoe UI, sans-serif; font-weight: 400; font-size: 11px; color: var(--ds-muted); margin-left: 8px; }
+.ds-findings-table { margin-bottom: 4px; }
+
+.ds-empty-state { color: var(--ds-muted); font-style: italic; }
+
+.ds-footer { text-align: center; color: var(--ds-muted); font-size: 12px; margin-top: 32px; }
+
+@media print {
+  body { background: white; }
+  .ds-section, .ds-header, .ds-stat-card, .ds-score-card { border: 1px solid #ccc; }
+}
+
+</style>
+</head>
+<body>
+  <div class="ds-container">
+    
+  <header class="ds-header">
+    <div class="ds-header-left">
+      <div class="ds-logo">DS</div>
+      <div>
+        <h1>DelphiSense Code Review Report</h1>
+        <div class="ds-subtitle">SampleUnit.pas</div>
+      </div>
+    </div>
+    <div class="ds-header-right">
+      <div class="ds-meta-row"><span>Generated</span><strong>Sep 25, 2026, 07:25 AM</strong></div>
+      <div class="ds-meta-row"><span>Target type</span><strong>File</strong></div>
+      <div class="ds-meta-row"><span>Files analyzed</span><strong>1</strong></div>
+      <div class="ds-meta-row"><span>Duration</span><strong>3 ms</strong></div>
+      <div class="ds-meta-row"><span>DelphiSense</span><strong>v0.1.0</strong></div>
+    </div>
+  </header>
+    
+  <section class="ds-summary">
+    <div class="ds-score-card">
+      <div class="ds-score-ring" style="--score: 92">
+        <span>92</span>
+      </div>
+      <div class="ds-score-label">Quality Score</div>
+    </div>
+    <div class="ds-stat-card ds-stat-total">
+      <div class="ds-stat-value">8</div>
+      <div class="ds-stat-label">Total Findings</div>
+    </div>
+    
+    <div class="ds-stat-card" style="border-top-color:#8a1c1c">
+      <div class="ds-stat-value" style="color:#8a1c1c">0</div>
+      <div class="ds-stat-label">Errors</div>
+    </div>
+    <div class="ds-stat-card" style="border-top-color:#8a5a00">
+      <div class="ds-stat-value" style="color:#8a5a00">3</div>
+      <div class="ds-stat-label">Warnings</div>
+    </div>
+    <div class="ds-stat-card" style="border-top-color:#1c5a8a">
+      <div class="ds-stat-value" style="color:#1c5a8a">5</div>
+      <div class="ds-stat-label">Hints</div>
+    </div>
+    <div class="ds-stat-card">
+      <div class="ds-stat-value">1</div>
+      <div class="ds-stat-label">Files Scanned</div>
+    </div>
+  </section>
+    
+  <section class="ds-section">
+    <h2>Findings by Category</h2>
+    <div class="ds-bars">
+      
+      <div class="ds-bar-row">
+        <div class="ds-bar-label">Code Smell</div>
+        <div class="ds-bar-track">
+          <div class="ds-bar-fill" style="width:100%;background:#b8860b"></div>
+        </div>
+        <div class="ds-bar-count">5</div>
+      </div>
+      <div class="ds-bar-row">
+        <div class="ds-bar-label">Documentation</div>
+        <div class="ds-bar-track">
+          <div class="ds-bar-fill" style="width:20%;background:#2a6fb0"></div>
+        </div>
+        <div class="ds-bar-count">1</div>
+      </div>
+      <div class="ds-bar-row">
+        <div class="ds-bar-label">Bug</div>
+        <div class="ds-bar-track">
+          <div class="ds-bar-fill" style="width:40%;background:#c0392b"></div>
+        </div>
+        <div class="ds-bar-count">2</div>
+      </div>
+    </div>
+  </section>
+    
+  <section class="ds-section">
+    <h2>File Summary</h2>
+    <table class="ds-table">
+      <thead>
+        <tr><th>File</th><th>Errors</th><th>Warnings</th><th>Hints</th><th>Total</th><th></th></tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td class="ds-file-cell" title="examples/SampleUnit.pas">examples/SampleUnit.pas</td>
+        <td class="ds-num ds-sev-error"></td>
+        <td class="ds-num ds-sev-warning">3</td>
+        <td class="ds-num ds-sev-hint">5</td>
+        <td class="ds-num ds-total-col">8</td>
+        <td><a href="#file-examples_SampleUnit_pas">Jump to detail &rarr;</a></td>
+      </tr></tbody>
+    </table>
+  </section>
+    
+  <section class="ds-section">
+    <h2>Detailed Findings</h2>
+    
+    <div class="ds-file-block" id="file-examples_SampleUnit_pas">
+      <h3>examples/SampleUnit.pas <span class="ds-file-fullpath">examples/SampleUnit.pas</span></h3>
+      <table class="ds-table ds-findings-table">
+        <thead><tr><th>Line</th><th>Severity</th><th>Category</th><th>Rule</th><th>Message</th></tr></thead>
+        <tbody>
+      <tr>
+        <td class="ds-num">5:1</td>
+        <td><span class="ds-badge" style="color:#1c5a8a;background:#e8f2fb">&#9432; Hint</span></td>
+        <td><span class="ds-category-chip" style="border-color:#b8860b;color:#b8860b">Code Smell</span></td>
+        <td class="ds-rule-id">unusedUses</td>
+        <td>Unit 'System.SysUtils' is listed in uses but does not appear to be used.</td>
+      </tr>
+      <tr>
+        <td class="ds-num">5:1</td>
+        <td><span class="ds-badge" style="color:#1c5a8a;background:#e8f2fb">&#9432; Hint</span></td>
+        <td><span class="ds-category-chip" style="border-color:#b8860b;color:#b8860b">Code Smell</span></td>
+        <td class="ds-rule-id">unusedUses</td>
+        <td>Unit 'System.Classes' is listed in uses but does not appear to be used.</td>
+      </tr>
+      <tr>
+        <td class="ds-num">5:1</td>
+        <td><span class="ds-badge" style="color:#1c5a8a;background:#e8f2fb">&#9432; Hint</span></td>
+        <td><span class="ds-category-chip" style="border-color:#b8860b;color:#b8860b">Code Smell</span></td>
+        <td class="ds-rule-id">unusedUses</td>
+        <td>Unit 'System.Variants' is listed in uses but does not appear to be used.</td>
+      </tr>
+      <tr>
+        <td class="ds-num">5:1</td>
+        <td><span class="ds-badge" style="color:#1c5a8a;background:#e8f2fb">&#9432; Hint</span></td>
+        <td><span class="ds-category-chip" style="border-color:#b8860b;color:#b8860b">Code Smell</span></td>
+        <td class="ds-rule-id">unusedUses</td>
+        <td>Unit 'Vcl.Dialogs' is listed in uses but does not appear to be used.</td>
+      </tr>
+      <tr>
+        <td class="ds-num">26:3</td>
+        <td><span class="ds-badge" style="color:#1c5a8a;background:#e8f2fb">&#9432; Hint</span></td>
+        <td><span class="ds-category-chip" style="border-color:#2a6fb0;color:#2a6fb0">Documentation</span></td>
+        <td class="ds-rule-id">todoComment</td>
+        <td>TODO: replace with real order lookup</td>
+      </tr>
+      <tr>
+        <td class="ds-num">35:1</td>
+        <td><span class="ds-badge" style="color:#8a5a00;background:#fff6e0">&#9888; Warning</span></td>
+        <td><span class="ds-category-chip" style="border-color:#b8860b;color:#b8860b">Code Smell</span></td>
+        <td class="ds-rule-id">deepNesting</td>
+        <td>Nesting depth exceeds 4 inside 'TOrderProcessor.ProcessOrder'. Consider extracting a sub-procedure or using guard clauses.</td>
+      </tr>
+      <tr>
+        <td class="ds-num">41:1</td>
+        <td><span class="ds-badge" style="color:#8a5a00;background:#fff6e0">&#9888; Warning</span></td>
+        <td><span class="ds-category-chip" style="border-color:#c0392b;color:#c0392b">Bug</span></td>
+        <td class="ds-rule-id">emptyExceptFinally</td>
+        <td>Empty 'except' block — exception is silently swallowed. Consider logging or re-raising.</td>
+      </tr>
+      <tr>
+        <td class="ds-num">45:1</td>
+        <td><span class="ds-badge" style="color:#8a5a00;background:#fff6e0">&#9888; Warning</span></td>
+        <td><span class="ds-category-chip" style="border-color:#c0392b;color:#c0392b">Bug</span></td>
+        <td class="ds-rule-id">deadCodeAfterExit</td>
+        <td>Statement is unreachable — it follows an unconditional Exit/raise/Abort.</td>
+      </tr></tbody>
+      </table>
+    </div>
+  </section>
+    
+  <footer class="ds-footer">
+    Generated by <strong>DelphiSense</strong> v0.1.0 — free, open Delphi code review for VS Code.
+  </footer>
+  </div>
+  <script></script>
+</body>
+</html>

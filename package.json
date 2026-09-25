@@ -1,0 +1,164 @@
+{
+  "name": "delphisense",
+  "displayName": "DelphiSense — Delphi Code Review",
+  "description": "Free, lightweight code-review and static-analysis extension for Embarcadero Delphi / Object Pascal. Works on any Delphi version. Generates professional HTML review reports.",
+  "version": "1.0.0",
+  "publisher": "informavijit",
+  "license": "MIT",
+  "icon": "resources/icon.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Linters",
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "delphi",
+    "pascal",
+    "object pascal",
+    "code review",
+    "static analysis",
+    "linter",
+    "pascal analyzer"
+  ],
+  "activationEvents": [
+    "onLanguage:pascal",
+    "onCommand:delphisense.analyzeFile",
+    "onCommand:delphisense.analyzeFolder",
+    "onCommand:delphisense.analyzeWorkspace",
+    "onCommand:delphisense.analyzeDpr"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "pascal",
+        "aliases": [
+          "Delphi",
+          "Object Pascal",
+          "Pascal"
+        ],
+        "extensions": [
+          ".pas",
+          ".dpr",
+          ".dpk",
+          ".pp",
+          ".inc"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "delphisense.analyzeFile",
+        "title": "DelphiSense: Analyze Current File",
+        "category": "DelphiSense"
+      },
+      {
+        "command": "delphisense.analyzeFolder",
+        "title": "DelphiSense: Analyze Folder...",
+        "category": "DelphiSense"
+      },
+      {
+        "command": "delphisense.analyzeDpr",
+        "title": "DelphiSense: Analyze Project (.dpr/.dpk)...",
+        "category": "DelphiSense"
+      },
+      {
+        "command": "delphisense.analyzeWorkspace",
+        "title": "DelphiSense: Analyze Workspace",
+        "category": "DelphiSense"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "delphisense.analyzeFile",
+          "when": "resourceExtname == .pas",
+          "group": "delphisense@1"
+        },
+        {
+          "command": "delphisense.analyzeDpr",
+          "when": "resourceExtname == .dpr || resourceExtname == .dpk",
+          "group": "delphisense@1"
+        },
+        {
+          "command": "delphisense.analyzeFolder",
+          "when": "explorerResourceIsFolder",
+          "group": "delphisense@1"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "delphisense.analyzeFile",
+          "when": "resourceExtname == .pas",
+          "group": "delphisense@1"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "delphisense.analyzeFile"
+        },
+        {
+          "command": "delphisense.analyzeFolder"
+        },
+        {
+          "command": "delphisense.analyzeDpr"
+        },
+        {
+          "command": "delphisense.analyzeWorkspace"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "DelphiSense",
+      "properties": {
+        "delphisense.longMethod.maxLines": {
+          "type": "number",
+          "default": 60,
+          "description": "Maximum body lines before a procedure/function is flagged as Long Method."
+        },
+        "delphisense.deepNesting.maxDepth": {
+          "type": "number",
+          "default": 4,
+          "description": "Maximum nested begin/if/for/while/case depth before flagging Deep Nesting."
+        },
+        "delphisense.maxLineLength.max": {
+          "type": "number",
+          "default": 120,
+          "description": "Maximum characters per line before flagging Long Line."
+        },
+        "delphisense.rules.disabled": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Rule IDs to disable, e.g. [\"unusedUses\", \"todoComment\"]."
+        },
+        "delphisense.customRulesPath": {
+          "type": "string",
+          "default": ".delphisense/rules.json",
+          "description": "Workspace-relative path to a custom rules JSON file (pattern-based rules)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.32.0",
+    "typescript": "^5.9.3"
+  },
+  "directories": {
+    "example": "examples"
+  },
+  "author": ""
+}

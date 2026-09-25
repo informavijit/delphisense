@@ -1,0 +1,16 @@
+{
+  "rules": [
+    {
+      "id": "noHardcodedConnStr",
+      "pattern": "Password\\s*=",
+      "message": "Possible hardcoded password in a connection string.",
+      "severity": "error"
+    },
+    {
+      "id": "noShowMessageInLoop",
+      "pattern": "ShowMessage\\s*\\(",
+      "message": "Avoid ShowMessage in production code paths — prefer logging.",
+      "severity": "hint"
+    }
+  ]
+}
