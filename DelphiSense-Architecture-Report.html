@@ -425,6 +425,111 @@
     .sev-hint { background: rgba(56, 189, 248, 0.15); color: var(--primary); border: 1px solid rgba(56, 189, 248, 0.3); }
     .sev-error { background: rgba(244, 63, 94, 0.15); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.3); }
 
+    /* Rule Elaboration Cards */
+    .rule-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--primary);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 28px;
+      transition: all 0.3s ease;
+    }
+
+    .rule-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      border-left-color: var(--primary);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .rule-card.rule-bug { border-left-color: var(--accent-rose); }
+    .rule-card.rule-smell { border-left-color: var(--accent-amber); }
+    .rule-card.rule-doc { border-left-color: var(--primary); }
+    .rule-card.rule-custom { border-left-color: var(--accent-purple); }
+
+    .rule-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .rule-title-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .rule-card-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .rule-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
+
+    .rule-meta-item strong {
+      color: var(--text-muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .rule-meta-item span {
+      color: var(--text-primary);
+      font-family: 'Fira Code', monospace;
+    }
+
+    .code-comparison {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .code-box {
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    .code-box-header {
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-anti { background: rgba(244, 63, 94, 0.15); color: var(--accent-rose); border-bottom: 1px solid rgba(244, 63, 94, 0.2); }
+    .header-fix { background: rgba(52, 211, 153, 0.15); color: var(--accent-emerald); border-bottom: 1px solid rgba(52, 211, 153, 0.2); }
+
+    .code-box pre {
+      margin: 0;
+      border: none;
+      border-radius: 0;
+      padding: 14px;
+      font-size: 12.5px;
+    }
+
     /* Code Blocks */
     pre {
       background: var(--code-bg);
@@ -512,6 +617,8 @@
       .hero-title, .section-title, h1, h2, h3, li strong { color: #000; }
       p, li, table.custom-table td { color: #333; }
       code, pre { background: #f5f5f5; color: #000; border: 1px solid #ddd; }
+      .rule-card { background: #fff; border: 1px solid #ccc; color: #000; }
+      .code-box-header { background: #eee; color: #000; }
     }
   </style>
 </head>
@@ -541,7 +648,7 @@
       <li class="nav-item"><a href="#system-arch">2. High-Level Architecture</a></li>
       <li class="nav-item"><a href="#data-flow">3. Data Flow Architecture</a></li>
       <li class="nav-item"><a href="#components">4. Component Breakdown</a></li>
-      <li class="nav-item"><a href="#builtin-rules">4.5 Built-in Rules Engine</a></li>
+      <li class="nav-item"><a href="#builtin-rules">4.5 Code Review Rules Deep-Dive</a></li>
       <li class="nav-item"><a href="#feature-list">5. Comprehensive Features</a></li>
       <li class="nav-item"><a href="#strengths">6. Non-Functional Strengths</a></li>
       <li class="nav-item"><a href="#roadmap">7. Strategic Roadmap</a></li>
@@ -554,13 +661,13 @@
     <!-- Hero Header -->
     <div class="hero-banner">
       <div class="hero-badge-row">
-        <span class="badge badge-primary">v0.1.0 Release</span>
+        <span class="badge badge-primary">v1.0.0 Release</span>
         <span class="badge badge-emerald">Zero External Dependencies</span>
         <span class="badge badge-purple">Standalone Engine</span>
       </div>
       <h1 class="hero-title">DelphiSense Architecture & Technical Specification</h1>
       <p class="hero-description">
-        Comprehensive design specification for the lightweight static analysis engine purpose-built for Embarcadero Delphi / Object Pascal codebases.
+        Comprehensive design specification and detailed code review rule catalog for the DelphiSense static analysis engine.
       </p>
     </div>
 
@@ -752,78 +859,337 @@ procedure Foo; begin ShowMessage('Exit; inside string'); end;
 // Blanked Representation passed to rules:
 procedure Foo; begin ShowMessage('                    '); end;</code></pre>
 
-      <div class="subsection-title" id="builtin-rules">4.5. Built-in Detection Rules Specification</div>
-      <div class="table-responsive">
-        <table class="custom-table">
-          <thead>
-            <tr>
-              <th>Rule ID</th>
-              <th>Category</th>
-              <th>Severity</th>
-              <th>Detection Logic & Strategy</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><span class="rule-id">unusedUses</span></td>
-              <td>Code Smell</td>
-              <td><span class="severity-badge sev-hint">Hint</span></td>
-              <td>Checks whether short unit names declared in <code>uses</code> clauses appear elsewhere in the file.</td>
-            </tr>
-            <tr>
-              <td><span class="rule-id">longMethod</span></td>
-              <td>Code Smell</td>
-              <td><span class="severity-badge sev-warning">Warning</span></td>
-              <td>Flags procedures/functions whose body line count exceeds <code>delphisense.longMethod.maxLines</code> (default: 60).</td>
-            </tr>
-            <tr>
-              <td><span class="rule-id">deepNesting</span></td>
-              <td>Code Smell</td>
-              <td><span class="severity-badge sev-warning">Warning</span></td>
-              <td>Tracks <code>begin/case/if/try</code> nesting depth per routine body against threshold (default: 4).</td>
-            </tr>
-            <tr>
-              <td><span class="rule-id">emptyExceptFinally</span></td>
-              <td>Bug</td>
-              <td><span class="severity-badge sev-warning">Warning</span></td>
-              <td>Detects empty <code>except...end</code> blocks (swallowed exceptions) or empty <code>finally</code> blocks.</td>
-            </tr>
-            <tr>
-              <td><span class="rule-id">deadCodeAfterExit</span></td>
-              <td>Bug</td>
-              <td><span class="severity-badge sev-warning">Warning</span></td>
-              <td>Flags unreachable statements immediately following <code>Exit</code>, <code>raise</code>, or <code>Abort</code>.</td>
-            </tr>
-            <tr>
-              <td><span class="rule-id">longLine</span></td>
-              <td>Code Smell</td>
-              <td><span class="severity-badge sev-hint">Hint</span></td>
-              <td>Flags lines exceeding <code>delphisense.maxLineLength.max</code> (default: 120 chars).</td>
-            </tr>
-            <tr>
-              <td><span class="rule-id">todoComment</span></td>
-              <td>Documentation</td>
-              <td><span class="severity-badge sev-hint">Hint</span></td>
-              <td>Extracts <code>TODO</code>, <code>FIXME</code>, <code>HACK</code>, or <code>XXX</code> comment annotations.</td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- 4.5. Built-in Code Review Rules Deep Dive -->
+      <div class="subsection-title" id="builtin-rules">4.5. Code Review Rules Elaboration & Catalog</div>
+      <p>
+        DelphiSense evaluates code using a two-tier rule engine: <strong>Built-in Rules</strong> (written in TypeScript with AST-neutral structural inspection) and <strong>Custom Workspace Rules</strong> (declarative JSON-defined regex patterns). Every rule implements the standardized <code>Rule</code> contract and generates granular <code>Finding</code> instances.
+      </p>
+
+      <!-- Rule 1: unusedUses -->
+      <div class="rule-card rule-smell">
+        <div class="rule-header-row">
+          <div class="rule-title-area">
+            <span class="rule-id">unusedUses</span>
+            <span class="rule-card-title">Unused Uses Clause Entry</span>
+          </div>
+          <div class="rule-badges">
+            <span class="severity-badge sev-hint">Hint</span>
+          </div>
+        </div>
+        <div class="rule-meta-grid">
+          <div class="rule-meta-item"><strong>Category</strong><span>Code Smell</span></div>
+          <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/unusedUses.ts</span></div>
+          <div class="rule-meta-item"><strong>Config Disable Key</strong><span>"unusedUses" in delphisense.rules.disabled</span></div>
+        </div>
+        <p>
+          <strong>Description & Objective:</strong> Scans unit imports in <code>interface</code>, <code>implementation</code>, and <code>program</code> level <code>uses</code> clauses. Flags any imported unit whose short name is never referenced anywhere else in the unit source file. Helps clean up unit interface bloat, reduce binary unit linking, and prevent symbol ambiguity.
+        </p>
+        <p>
+          <strong>Detection Algorithm:</strong> Extracts short unit names (e.g. <code>System.SysUtils</code> &rarr; <code>SysUtils</code>). Constructs a global word-boundary regular expression <code>\bSysUtils\b</code> and executes it against the clean unit text. If total occurrences $\le 1$ (meaning it only appears once in the <code>uses</code> clause itself), it generates a Hint finding.
+        </p>
+        <div class="code-comparison">
+          <div class="code-box">
+            <div class="code-box-header header-anti">⚠️ Anti-Pattern (Unused Unit)</div>
+            <pre><code>unit SampleUnit;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, Vcl.Dialogs; // Vcl.Dialogs is never referenced!
+
+type
+  TMyClass = class(TPersistent);</code></pre>
+          </div>
+          <div class="code-box">
+            <div class="code-box-header header-fix">✅ Recommended Compliant Code</div>
+            <pre><code>unit SampleUnit;
+
+interface
+
+uses
+  System.SysUtils, System.Classes; // Removed unused Vcl.Dialogs
+
+type
+  TMyClass = class(TPersistent);</code></pre>
+          </div>
+        </div>
       </div>
 
-      <div class="subsection-title">4.6. Custom Rules Declarative Framework (src/engine/customRules.ts)</div>
-      <p>
-        Teams can define custom regex rules without writing TypeScript code via <code>.delphisense/rules.json</code>:
-      </p>
-      <pre><code>{
+      <!-- Rule 2: longMethod -->
+      <div class="rule-card rule-smell">
+        <div class="rule-header-row">
+          <div class="rule-title-area">
+            <span class="rule-id">longMethod</span>
+            <span class="rule-card-title">Excessive Method Body Length</span>
+          </div>
+          <div class="rule-badges">
+            <span class="severity-badge sev-warning">Warning</span>
+          </div>
+        </div>
+        <div class="rule-meta-grid">
+          <div class="rule-meta-item"><strong>Category</strong><span>Code Smell</span></div>
+          <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/longMethod.ts</span></div>
+          <div class="rule-meta-item"><strong>Config Setting</strong><span>delphisense.longMethod.maxLines (default: 60)</span></div>
+        </div>
+        <p>
+          <strong>Description & Objective:</strong> Flags procedures, functions, constructors, or destructors whose body line count exceeds the maximum recommended threshold. Promotes the Single Responsibility Principle (SRP) and improves unit testing capability.
+        </p>
+        <p>
+          <strong>Detection Algorithm:</strong> The structural analyzer balances routine <code>begin</code> and matching <code>end</code> tokens to compute exact line spans (<code>bodyEndLine - bodyStartLine + 1</code>). If the body line count exceeds <code>longMethodMaxLines</code> (default: 60 lines), a Warning finding is generated on the routine's declaration header.
+        </p>
+        <div class="code-comparison">
+          <div class="code-box">
+            <div class="code-box-header header-anti">⚠️ Anti-Pattern (Monolithic Procedure > 60 lines)</div>
+            <pre><code>procedure TOrderProcessor.ProcessOrder(const OrderId: Integer);
+begin
+  // 70+ lines of monolithic code handling:
+  // 1. Validation
+  // 2. Database transaction
+  // 3. Discount calculation
+  // 4. Email notification setup
+  // 5. UI state update
+end;</code></pre>
+          </div>
+          <div class="code-box">
+            <div class="code-box-header header-fix">✅ Recommended Compliant Code</div>
+            <pre><code>procedure TOrderProcessor.ProcessOrder(const OrderId: Integer);
+begin
+  ValidateOrder(OrderId);
+  ExecuteOrderTransaction(OrderId);
+  SendConfirmationEmail(OrderId);
+  UpdateUIState;
+end;</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rule 3: deepNesting -->
+      <div class="rule-card rule-smell">
+        <div class="rule-header-row">
+          <div class="rule-title-area">
+            <span class="rule-id">deepNesting</span>
+            <span class="rule-card-title">Excessive Control-Flow Nesting Depth</span>
+          </div>
+          <div class="rule-badges">
+            <span class="severity-badge sev-warning">Warning</span>
+          </div>
+        </div>
+        <div class="rule-meta-grid">
+          <div class="rule-meta-item"><strong>Category</strong><span>Code Smell</span></div>
+          <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/deepNesting.ts</span></div>
+          <div class="rule-meta-item"><strong>Config Setting</strong><span>delphisense.deepNesting.maxDepth (default: 4)</span></div>
+        </div>
+        <p>
+          <strong>Description & Objective:</strong> Tracks control-flow block nesting (<code>begin</code>, <code>case</code>, <code>if</code>, <code>for</code>, <code>while</code>, <code>try</code>) within routine bodies and flags lines where nesting exceeds the threshold. Prevents "Arrow Anti-Pattern" code that is hard to read and debug.
+        </p>
+        <p>
+          <strong>Detection Algorithm:</strong> Iterates line-by-line through the routine body, incrementing depth on block-opening keywords (<code>begin</code>, <code>case</code>) and decrementing on <code>end</code> keywords. If <code>depth > maxDepth</code> (default: 4), a Warning finding is reported at the exact line where the threshold is breached.
+        </p>
+        <div class="code-comparison">
+          <div class="code-box">
+            <div class="code-box-header header-anti">⚠️ Anti-Pattern (Nesting Depth = 5)</div>
+            <pre><code>procedure ProcessData;
+begin
+  if OrderId > 0 then
+    for i := 1 to 10 do
+      if i > 5 then
+        if i mod 2 = 0 then
+          begin // Nesting depth = 5!
+            DoWork;
+          end;
+end;</code></pre>
+          </div>
+          <div class="code-box">
+            <div class="code-box-header header-fix">✅ Recommended Guard Clause Refactoring</div>
+            <pre><code>procedure ProcessData;
+begin
+  if OrderId <= 0 then Exit; // Guard Clause
+
+  for i := 6 to 10 do
+  begin
+    if i mod 2 = 0 then
+      DoWork;
+  end;
+end;</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rule 4: emptyExceptFinally -->
+      <div class="rule-card rule-bug">
+        <div class="rule-header-row">
+          <div class="rule-title-area">
+            <span class="rule-id">emptyExceptFinally</span>
+            <span class="rule-card-title">Empty Exception Handler or Cleanup Block</span>
+          </div>
+          <div class="rule-badges">
+            <span class="severity-badge sev-warning">Warning</span>
+          </div>
+        </div>
+        <div class="rule-meta-grid">
+          <div class="rule-meta-item"><strong>Category</strong><span>Bug</span></div>
+          <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/emptyExceptFinally.ts</span></div>
+          <div class="rule-meta-item"><strong>Config Disable Key</strong><span>"emptyExceptFinally" in delphisense.rules.disabled</span></div>
+        </div>
+        <p>
+          <strong>Description & Objective:</strong> Detects <code>except...end</code> blocks with no operational code (which silently swallow runtime errors) and empty <code>finally...end</code> blocks (dead cleanup blocks).
+        </p>
+        <p>
+          <strong>Detection Algorithm:</strong> Identifies lines starting with <code>except</code> or <code>finally</code>. Scans look-ahead lines up to the matching <code>end</code> statement. If no non-comment, non-blank statements exist inside the block, a Warning finding is generated.
+        </p>
+        <div class="code-comparison">
+          <div class="code-box">
+            <div class="code-box-header header-anti">⚠️ Anti-Pattern (Swallowed Exception)</div>
+            <pre><code>try
+  PerformDatabaseUpdate;
+except
+  // Exception silently swallowed — dangerous!
+end;</code></pre>
+          </div>
+          <div class="code-box">
+            <div class="code-box-header header-fix">✅ Recommended Compliant Code</div>
+            <pre><code>try
+  PerformDatabaseUpdate;
+except
+  on E: Exception do
+    Logger.LogError('Update failed: ' + E.Message);
+end;</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rule 5: deadCodeAfterExit -->
+      <div class="rule-card rule-bug">
+        <div class="rule-header-row">
+          <div class="rule-title-area">
+            <span class="rule-id">deadCodeAfterExit</span>
+            <span class="rule-card-title">Unreachable Statements After Exit / Raise / Abort</span>
+          </div>
+          <div class="rule-badges">
+            <span class="severity-badge sev-warning">Warning</span>
+          </div>
+        </div>
+        <div class="rule-meta-grid">
+          <div class="rule-meta-item"><strong>Category</strong><span>Bug</span></div>
+          <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/deadCodeAfterExit.ts</span></div>
+          <div class="rule-meta-item"><strong>Config Disable Key</strong><span>"deadCodeAfterExit" in delphisense.rules.disabled</span></div>
+        </div>
+        <p>
+          <strong>Description & Objective:</strong> Flags statements located directly after unconditional <code>Exit;</code>, <code>Exit(...)</code>, <code>raise ...;</code>, or <code>Abort;</code> statements that can never be executed.
+        </p>
+        <p>
+          <strong>Detection Algorithm:</strong> Detects lines ending with unconditional control terminators. Inspects the next non-blank, non-comment line. If that line contains an operational statement (and is not a valid block closer like <code>end</code>, <code>until</code>, <code>else</code>, <code>except</code>, or <code>finally</code>), it flags the line as dead code.
+        </p>
+        <div class="code-comparison">
+          <div class="code-box">
+            <div class="code-box-header header-anti">⚠️ Anti-Pattern (Unreachable Code)</div>
+            <pre><code>procedure ValidateUser;
+begin
+  Exit;
+  s := 'unreachable assignment'; // Will never execute!
+end;</code></pre>
+          </div>
+          <div class="code-box">
+            <div class="code-box-header header-fix">✅ Recommended Compliant Code</div>
+            <pre><code>procedure ValidateUser;
+begin
+  if not IsValid then
+    Exit;
+  
+  s := 'valid assignment';
+end;</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rule 6: longLine -->
+      <div class="rule-card rule-smell">
+        <div class="rule-header-row">
+          <div class="rule-title-area">
+            <span class="rule-id">longLine</span>
+            <span class="rule-card-title">Source Line Length Threshold Exceeded</span>
+          </div>
+          <div class="rule-badges">
+            <span class="severity-badge sev-hint">Hint</span>
+          </div>
+        </div>
+        <div class="rule-meta-grid">
+          <div class="rule-meta-item"><strong>Category</strong><span>Code Smell</span></div>
+          <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/longLine.ts</span></div>
+          <div class="rule-meta-item"><strong>Config Setting</strong><span>delphisense.maxLineLength.max (default: 120)</span></div>
+        </div>
+        <p>
+          <strong>Description & Objective:</strong> Flags individual source lines whose character count exceeds the configured maximum length. Ensures code readability on side-by-side diff viewers and smaller displays.
+        </p>
+        <p>
+          <strong>Detection Algorithm:</strong> Checks length of raw source lines (<code>line.length > max</code>). If exceeded, reports a Hint finding starting at column <code>max + 1</code>.
+        </p>
+      </div>
+
+      <!-- Rule 7: todoComment -->
+      <div class="rule-card rule-doc">
+        <div class="rule-header-row">
+          <div class="rule-title-area">
+            <span class="rule-id">todoComment</span>
+            <span class="rule-card-title">Technical Debt & Action Item Annotations</span>
+          </div>
+          <div class="rule-badges">
+            <span class="severity-badge sev-hint">Hint</span>
+          </div>
+        </div>
+        <div class="rule-meta-grid">
+          <div class="rule-meta-item"><strong>Category</strong><span>Documentation</span></div>
+          <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/todoComment.ts</span></div>
+          <div class="rule-meta-item"><strong>Config Disable Key</strong><span>"todoComment" in delphisense.rules.disabled</span></div>
+        </div>
+        <p>
+          <strong>Description & Objective:</strong> Extracts technical debt comment markers (<code>TODO</code>, <code>FIXME</code>, <code>HACK</code>, <code>XXX</code>) from code comments and surfaces them as Hints in VS Code.
+        </p>
+        <p>
+          <strong>Detection Algorithm:</strong> Evaluates extracted comments against regex <code>/\b(TODO|FIXME|HACK|XXX)\b[:\s]*(.*)/i</code>. Extracts marker text and detail description to populate the diagnostic message.
+        </p>
+      </div>
+
+      <!-- Custom Rules Section -->
+      <div class="rule-card rule-custom">
+        <div class="rule-header-row">
+          <div class="rule-title-area">
+            <span class="rule-id">customRules Engine</span>
+            <span class="rule-card-title">Declarative Workspace Pattern Rules</span>
+          </div>
+          <div class="rule-badges">
+            <span class="severity-badge" style="background:rgba(192, 132, 252, 0.15);color:var(--accent-purple);border:1px solid rgba(192, 132, 252, 0.3)">Custom</span>
+          </div>
+        </div>
+        <div class="rule-meta-grid">
+          <div class="rule-meta-item"><strong>Category</strong><span>Custom / Security / Standards</span></div>
+          <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/customRules.ts</span></div>
+          <div class="rule-meta-item"><strong>Workspace Config File</strong><span>.delphisense/rules.json</span></div>
+        </div>
+        <p>
+          <strong>Description & Objective:</strong> Allows development teams to declare custom, pattern-based review rules in JSON format without writing TypeScript code or modifying extension binaries.
+        </p>
+        <p>
+          <strong>Schema Example:</strong>
+        </p>
+        <pre><code>{
   "rules": [
     {
       "id": "noHardcodedConnStr",
       "pattern": "Password\\s*=",
       "message": "Possible hardcoded password in a connection string.",
       "severity": "error"
+    },
+    {
+      "id": "noShowMessageInLoop",
+      "pattern": "ShowMessage\\s*\\(",
+      "message": "Avoid ShowMessage in production code paths — prefer logging.",
+      "severity": "hint"
     }
   ]
 }</code></pre>
+      </div>
+
     </section>
 
     <!-- 5. Features -->
