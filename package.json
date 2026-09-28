@@ -2,7 +2,7 @@
   "name": "delphisense",
   "displayName": "DelphiSense — Delphi Code Review",
   "description": "Free, lightweight code-review and static-analysis extension for Embarcadero Delphi / Object Pascal. Works on any Delphi version. Generates professional HTML review reports.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "AvijitKumarTewary",
   "license": "MIT",
   "icon": "resources/icon.png",
@@ -51,6 +51,11 @@
     ],
     "commands": [
       {
+        "command": "delphisense.analyzeSelection",
+        "title": "DelphiSense: Analyze Selected Lines",
+        "category": "DelphiSense"
+      },
+      {
         "command": "delphisense.analyzeFile",
         "title": "DelphiSense: Analyze Current File",
         "category": "DelphiSense"
@@ -91,12 +96,20 @@
       ],
       "editor/context": [
         {
+          "command": "delphisense.analyzeSelection",
+          "when": "editorHasSelection",
+          "group": "delphisense@1"
+        },
+        {
           "command": "delphisense.analyzeFile",
           "when": "resourceExtname == .pas",
-          "group": "delphisense@1"
+          "group": "delphisense@2"
         }
       ],
       "commandPalette": [
+        {
+          "command": "delphisense.analyzeSelection"
+        },
         {
           "command": "delphisense.analyzeFile"
         },
@@ -129,13 +142,108 @@
           "default": 120,
           "description": "Maximum characters per line before flagging Long Line."
         },
+        "delphisense.rules.unusedUses": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable rule: Unused Uses (Flags units in uses clause that are not referenced)."
+        },
+        "delphisense.rules.longMethod": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable rule: Long Method (Flags procedure/function bodies exceeding max lines)."
+        },
+        "delphisense.rules.emptyExceptFinally": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable rule: Empty Except/Finally (Flags empty exception handling blocks)."
+        },
+        "delphisense.rules.todoComment": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable rule: TODO Comment (Flags TODO, FIXME, XXX comments)."
+        },
+        "delphisense.rules.deepNesting": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable rule: Deep Nesting (Flags statements exceeding nesting depth)."
+        },
+        "delphisense.rules.deadCodeAfterExit": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable rule: Dead Code After Exit (Flags unreachable statements following Exit)."
+        },
+        "delphisense.rules.longLine": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable rule: Long Line (Flags lines exceeding max character length)."
+        },
+        "delphisense.rules.resourceLeakMissingTryFinally": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable rule: Resource Leak - Missing try..finally (Flags object creation without protection block)."
+        },
+        "delphisense.rules.sqlInjection": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable rule: SQL Injection (Flags string concatenation in SQL queries)."
+        },
+        "delphisense.rules.hardcodedSecrets": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable rule: Hardcoded Secrets (Flags passwords, tokens, API keys in code)."
+        },
+        "delphisense.rules.tooManyParameters": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable rule: Too Many Parameters (Flags routine headers exceeding parameter threshold)."
+        },
+        "delphisense.rules.commentedOutCode": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable rule: Commented-Out Code (Flags leftover Pascal code blocks in comments)."
+        },
+        "delphisense.rules.redundantBooleanComparison": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable rule: Redundant Boolean Comparison (Flags = True or = False comparisons)."
+        },
         "delphisense.rules.disabled": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "unusedUses",
+              "longMethod",
+              "emptyExceptFinally",
+              "todoComment",
+              "deepNesting",
+              "deadCodeAfterExit",
+              "longLine",
+              "resourceLeakMissingTryFinally",
+              "sqlInjection",
+              "hardcodedSecrets",
+              "tooManyParameters",
+              "commentedOutCode",
+              "redundantBooleanComparison"
+            ],
+            "enumDescriptions": [
+              "Flags units in uses clause that are not referenced.",
+              "Flags procedure/function bodies exceeding line limits.",
+              "Flags empty except or finally blocks.",
+              "Flags TODO, FIXME, XXX comments.",
+              "Flags statements exceeding maximum nesting depth.",
+              "Flags unreachable code following Exit.",
+              "Flags lines exceeding character length limits.",
+              "Flags object creation without try..finally block.",
+              "Flags string concatenation in SQL queries.",
+              "Flags hardcoded passwords, tokens, API keys.",
+              "Flags routine headers exceeding parameter threshold.",
+              "Flags blocks of commented-out Pascal code.",
+              "Flags redundant comparisons to boolean literals (= True / = False)."
+            ]
           },
           "default": [],
-          "description": "Rule IDs to disable, e.g. [\"unusedUses\", \"todoComment\"]."
+          "description": "List of rule IDs to disable."
         },
         "delphisense.customRulesPath": {
           "type": "string",

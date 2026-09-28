@@ -12,6 +12,8 @@ type
   public
     procedure ProcessOrder(const OrderId: Integer);
     function CalculateDiscount(Amount: Double): Double;
+    procedure ExecuteQuery(QueryText: string);
+    procedure SaveCustomer(ID, Name, Email, Address, City, Country, Phone: string);
   end;
 
 implementation
@@ -22,8 +24,13 @@ procedure TOrderProcessor.ProcessOrder(const OrderId: Integer);
 var
   i: Integer;
   s: string;
+  List: TStringList;
 begin
   // TODO: replace with real order lookup
+  List := TStringList.Create;
+  List.Add('Order ' + IntToStr(OrderId));
+  // Note: List is created without try..finally protection block
+
   try
     for i := 1 to 10 do
     begin
@@ -43,6 +50,25 @@ begin
 
   Exit;
   s := 'unreachable';
+end;
+
+procedure TOrderProcessor.ExecuteQuery(QueryText: string);
+var
+  DBPassword: string;
+  SQLText: string;
+begin
+  DBPassword := 'Admin123SecretPass!';
+  SQLText := 'SELECT * FROM Orders WHERE ID = ' + QueryText;
+
+  // procedure LegacyProcess;
+  // begin
+  //   ShowMessage('Old process');
+  // end;
+end;
+
+procedure TOrderProcessor.SaveCustomer(ID, Name, Email, Address, City, Country, Phone: string);
+begin
+  // Save customer details
 end;
 
 function TOrderProcessor.CalculateDiscount(Amount: Double): Double;

@@ -733,9 +733,9 @@
     <!-- Hero Header -->
     <div class="hero-banner">
       <div class="hero-badge-row">
-        <span class="badge badge-primary">v1.0.0 Release</span>
+        <span class="badge badge-primary">v1.0.1 Release</span>
         <span class="badge badge-emerald">Zero External Dependencies</span>
-        <span class="badge badge-purple">8 Report Categories</span>
+        <span class="badge badge-purple">12 Built-in Native Rules & Custom JSON</span>
       </div>
       <h1 class="hero-title">DelphiSense Architecture & Technical Specification</h1>
       <p class="hero-description">
@@ -756,11 +756,11 @@
 
       <div class="metric-card">
         <div class="metric-header">
-          <span class="metric-label">Report Categories</span>
-          <div class="metric-icon icon-purple">📊</div>
+          <span class="metric-label">Built-in Rules</span>
+          <div class="metric-icon icon-purple">🛡️</div>
         </div>
-        <div class="metric-value">8 Core</div>
-        <div class="metric-sub">Status, Warnings, Uses, Metrics & OO</div>
+        <div class="metric-value">13 Native</div>
+        <div class="metric-sub">Bug, Security, KISS, YAGNI & Code Smell Rules</div>
       </div>
 
       <div class="metric-card">
@@ -768,8 +768,8 @@
           <span class="metric-label">Target Scopes</span>
           <div class="metric-icon icon-green">🎯</div>
         </div>
-        <div class="metric-value">4 Modes</div>
-        <div class="metric-sub">File, Folder, .DPR Project & Workspace</div>
+        <div class="metric-value">5 Modes</div>
+        <div class="metric-sub">File, Selection, Folder, .DPR Project & Workspace</div>
       </div>
 
       <div class="metric-card">
@@ -816,7 +816,7 @@
         <pre class="mermaid">
 flowchart TD
     subgraph VSCodeHost["VS Code Extension Host (src/extension.ts)"]
-        Cmds["Command Handlers<br/>(File, Folder, DPR, Workspace)"]
+        Cmds["Command Handlers<br/>(File, Selection, Folder, DPR, Workspace)"]
         Progress["VS Code Progress Notification"]
         DiagBridge["Diagnostics Bridge<br/>(src/diagnostics.ts)"]
         Webview["Webview Panel & File Saver"]
@@ -907,138 +907,110 @@ sequenceDiagram
     <section id="report-categories" class="doc-section">
       <div class="section-header">
         <div class="section-num">4</div>
-        <h2 class="section-title">Main Report Categories & Key Sections</h2>
+        <h2 class="section-title">Main Report Categories & Summary Taxonomy</h2>
       </div>
       <p>
-        DelphiSense categorizes static analysis findings and code review insights into <strong>8 specialized report sections</strong> to ensure comprehensive visibility across all developer and architectural concerns:
+        DelphiSense organizes static analysis findings and code review metrics into <strong>5 standardized finding categories</strong> and <strong>6 core report sections</strong>, featuring Lines of Code (LOC) density normalization and rule-level breakdown:
       </p>
 
       <div class="report-categories-grid">
-        <!-- Category 1 -->
+        <!-- Category 1: Bug -->
         <div class="report-cat-card">
           <div class="report-cat-header">
             <div class="report-cat-num">1</div>
-            <div class="report-cat-title">Status Report</div>
+            <div class="report-cat-title">Bug / Reliability</div>
           </div>
           <div class="report-cat-desc">
-            Always generated first. Details analysis target parameters, line counts, scanned files, execution time (ms), disabled rules, and custom rule configurations.
+            Highlights critical runtime showstoppers, memory leak risks (unprotected <code>.Create</code> calls), swallowed exception handlers, and dead code following Exit/raise.
           </div>
           <div class="report-cat-tags">
-            <span class="tag">Target Metadata</span>
-            <span class="tag">Rule Settings</span>
-            <span class="tag">Execution Stats</span>
+            <span class="tag">resourceLeakMissingTryFinally</span>
+            <span class="tag">emptyExceptFinally</span>
+            <span class="tag">deadCodeAfterExit</span>
           </div>
         </div>
 
-        <!-- Category 2 -->
+        <!-- Category 2: Security -->
         <div class="report-cat-card">
           <div class="report-cat-header">
             <div class="report-cat-num">2</div>
-            <div class="report-cat-title">General & Strong Warnings</div>
+            <div class="report-cat-title">Security & DevSecOps</div>
           </div>
           <div class="report-cat-desc">
-            Highlights critical runtime showstoppers, potential bugs, uninitialized variables, empty exception handlers, unhandled destructor calls, and dead code following Exit/raise.
+            Surfaces OWASP Top 10 security vulnerabilities, including string concatenation in SQL queries (SQL Injection) and embedded passwords/tokens in source code.
           </div>
           <div class="report-cat-tags">
-            <span class="tag">emptyExceptFinally</span>
-            <span class="tag">deadCodeAfterExit</span>
-            <span class="tag">unassignedVariable</span>
+            <span class="tag">sqlInjection</span>
+            <span class="tag">hardcodedSecrets</span>
+            <span class="tag">ShiftLeftSecurity</span>
           </div>
         </div>
 
-        <!-- Category 3 -->
+        <!-- Category 3: Code Smell -->
         <div class="report-cat-card">
           <div class="report-cat-header">
             <div class="report-cat-num">3</div>
-            <div class="report-cat-title">Optimization Report</div>
+            <div class="report-cat-title">Code Smell & KISS / YAGNI</div>
           </div>
           <div class="report-cat-desc">
-            Identifies performance enhancement opportunities, such as string concatenation inside loops (recommending TStringBuilder) or getter/setter method inline candidates.
-          </div>
-          <div class="report-cat-tags">
-            <span class="tag">stringConcatInLoop</span>
-            <span class="tag">inlineDirectives</span>
-            <span class="tag">LoopAllocations</span>
-          </div>
-        </div>
-
-        <!-- Category 4 -->
-        <div class="report-cat-card">
-          <div class="report-cat-header">
-            <div class="report-cat-num">4</div>
-            <div class="report-cat-title">Code Reduction Report</div>
-          </div>
-          <div class="report-cat-desc">
-            Pinpoints dead, redundant, or unused code for refactoring. Covers unused variables, redundant boolean comparisons (e.g. <code>if X = True</code>), and unused parameters.
-          </div>
-          <div class="report-cat-tags">
-            <span class="tag">unusedVariable</span>
-            <span class="tag">redundantBoolean</span>
-            <span class="tag">unusedParameter</span>
-          </div>
-        </div>
-
-        <!-- Category 5 -->
-        <div class="report-cat-card">
-          <div class="report-cat-header">
-            <div class="report-cat-num">5</div>
-            <div class="report-cat-title">Uses Dependency Report</div>
-          </div>
-          <div class="report-cat-desc">
-            Analyzes unit <code>uses</code> clauses across interface and implementation sections. Identifies unneeded unit imports and units eligible to shift to implementation.
-          </div>
-          <div class="report-cat-tags">
-            <span class="tag">unusedUses</span>
-            <span class="tag">usesShiftToImpl</span>
-            <span class="tag">DependencyCycles</span>
-          </div>
-        </div>
-
-        <!-- Category 6 -->
-        <div class="report-cat-card">
-          <div class="report-cat-header">
-            <div class="report-cat-num">6</div>
-            <div class="report-cat-title">Metrics & Complexity</div>
-          </div>
-          <div class="report-cat-desc">
-            Measures structural code metrics per routine, including Lines of Code (LOC), block nesting depth (<code>deepNesting</code>), and Cyclomatic Decision Points (DP).
+            Pinpoints maintainability issues, long methods (>60 lines), deep control-flow nesting (>4 depth), excessive parameter headers (>5 params), long lines, redundant boolean comparisons, and commented-out dead code blocks.
           </div>
           <div class="report-cat-tags">
             <span class="tag">longMethod</span>
             <span class="tag">deepNesting</span>
-            <span class="tag">CyclomaticDP</span>
+            <span class="tag">tooManyParameters</span>
+            <span class="tag">redundantBooleanComparison</span>
+            <span class="tag">commentedOutCode</span>
+            <span class="tag">unusedUses</span>
           </div>
         </div>
 
-        <!-- Category 7 -->
+        <!-- Category 4: Documentation -->
         <div class="report-cat-card">
           <div class="report-cat-header">
-            <div class="report-cat-num">7</div>
-            <div class="report-cat-title">Reference & Cross-Reference</div>
+            <div class="report-cat-num">4</div>
+            <div class="report-cat-title">Documentation & Debt</div>
           </div>
           <div class="report-cat-desc">
-            Maps out project identifiers, showing where specific variables, methods, or classes are declared and referenced across units, plus detecting local variable shadowing.
+            Surfaces technical debt annotations (<code>TODO</code>, <code>FIXME</code>, <code>HACK</code>, <code>XXX</code>) and missing public API documentation comments across units.
           </div>
           <div class="report-cat-tags">
-            <span class="tag">SymbolMapping</span>
-            <span class="tag">shadowedVariable</span>
-            <span class="tag">CrossUnitRefs</span>
+            <span class="tag">todoComment</span>
+            <span class="tag">TechnicalDebt</span>
+            <span class="tag">ApiDoc</span>
           </div>
         </div>
 
-        <!-- Category 8 -->
+        <!-- Category 5: Custom -->
         <div class="report-cat-card">
           <div class="report-cat-header">
-            <div class="report-cat-num">8</div>
-            <div class="report-cat-title">Class & Control Reports</div>
+            <div class="report-cat-num">5</div>
+            <div class="report-cat-title">Custom Workspace Rules</div>
           </div>
           <div class="report-cat-desc">
-            Documents object-oriented design structures, verifying Pascal naming conventions (T/I/F prefixes), override keywords on virtual methods, and field access boundaries.
+            Evaluates team-specific pattern rules declared in <code>.delphisense/rules.json</code>, enabling project-custom linting without recompiling extension binaries.
           </div>
           <div class="report-cat-tags">
-            <span class="tag">pascalNaming</span>
-            <span class="tag">missingOverride</span>
-            <span class="tag">ClassHierarchy</span>
+            <span class="tag">rules.json</span>
+            <span class="tag">PatternMatching</span>
+            <span class="tag">TeamStandards</span>
+          </div>
+        </div>
+
+        <!-- Category 6: LOC & Summary -->
+        <div class="report-cat-card">
+          <div class="report-cat-header">
+            <div class="report-cat-num">6</div>
+            <div class="report-cat-title">LOC & Rule Summary Sections</div>
+          </div>
+          <div class="report-cat-desc">
+            Provides executive header stats, LOC line counts, LOC finding density (findings per 100 LOC), Rule-wise Findings summary table, and clean file status badges.
+          </div>
+          <div class="report-cat-tags">
+            <span class="tag">TotalLOC</span>
+            <span class="tag">FindingDensity</span>
+            <span class="tag">RuleSummaryTable</span>
+            <span class="tag">CleanFileBadge</span>
           </div>
         </div>
       </div>
@@ -1329,7 +1301,7 @@ end;</code></pre>
         <div class="rule-meta-grid">
           <div class="rule-meta-item"><strong>Category</strong><span>Code Reduction</span></div>
           <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/todoComment.ts</span></div>
-          <div class="rule-meta-item"><strong>Config Disable Key</strong><span>"todoComment" in delphisense.rules.disabled</span></div>
+          <div class="rule-meta-item"><strong>Config Setting / Disable Key</strong><span>delphisense.rules.todoComment</span></div>
         </div>
         <p>
           <strong>Description & Objective:</strong> Extracts technical debt comment markers (<code>TODO</code>, <code>FIXME</code>, <code>HACK</code>, <code>XXX</code>) from code comments and surfaces them as Hints in VS Code.
@@ -1337,6 +1309,204 @@ end;</code></pre>
         <p>
           <strong>Detection Algorithm:</strong> Evaluates extracted comments against regex <code>/\b(TODO|FIXME|HACK|XXX)\b[:\s]*(.*)/i</code>. Extracts marker text and detail description to populate the diagnostic message.
         </p>
+      </div>
+
+      <!-- Rule 8: resourceLeakMissingTryFinally -->
+      <div class="rule-card rule-bug">
+        <div class="rule-header-row">
+          <div class="rule-title-area">
+            <span class="rule-id">resourceLeakMissingTryFinally</span>
+            <span class="rule-card-title">Disposable Object Creation Without try...finally</span>
+          </div>
+          <div class="rule-badges">
+            <span class="severity-badge sev-warning">Warning</span>
+          </div>
+        </div>
+        <div class="rule-meta-grid">
+          <div class="rule-meta-item"><strong>Category</strong><span>Bug / DevSecOps</span></div>
+          <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/resourceLeakMissingTryFinally.ts</span></div>
+          <div class="rule-meta-item"><strong>Config Setting / Disable Key</strong><span>delphisense.rules.resourceLeakMissingTryFinally</span></div>
+        </div>
+        <p>
+          <strong>Description & Objective:</strong> Flags instances where a disposable Delphi object is instantiated via <code>.Create</code> inside a routine body without a corresponding <code>try ... finally Obj.Free; end</code> block to ensure cleanup. Memory leaks from unprotected object creation represent one of the most common runtime bugs in Delphi applications.
+        </p>
+        <p>
+          <strong>Detection Algorithm:</strong> Scans routine bodies for assignment expressions matching <code>VarName := TClassName.Create</code>. Verifies look-ahead statements within the routine for an enclosing <code>try</code> block containing <code>VarName.Free</code> or <code>FreeAndNil(VarName)</code> inside its <code>finally</code> clause.
+        </p>
+        <div class="code-comparison">
+          <div class="code-box">
+            <div class="code-box-header header-anti">⚠️ Anti-Pattern (Unprotected Object Creation)</div>
+            <pre><code>procedure Process;
+var List: TStringList;
+begin
+  List := TStringList.Create; // Memory leak risk if exception thrown!
+  List.Add('Data');
+  List.Free;
+end;</code></pre>
+          </div>
+          <div class="code-box">
+            <div class="code-box-header header-fix">✅ Recommended Compliant Code</div>
+            <pre><code>procedure Process;
+var List: TStringList;
+begin
+  List := TStringList.Create;
+  try
+    List.Add('Data');
+  finally
+    List.Free;
+  end;
+end;</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rule 9: sqlInjection -->
+      <div class="rule-card rule-bug">
+        <div class="rule-header-row">
+          <div class="rule-title-area">
+            <span class="rule-id">sqlInjection</span>
+            <span class="rule-card-title">SQL Query String Concatenation Risk</span>
+          </div>
+          <div class="rule-badges">
+            <span class="severity-badge sev-error" style="background:rgba(244,63,94,0.15);color:var(--accent-rose);border:1px solid rgba(244,63,94,0.3)">Error</span>
+          </div>
+        </div>
+        <div class="rule-meta-grid">
+          <div class="rule-meta-item"><strong>Category</strong><span>Security / DevSecOps</span></div>
+          <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/sqlInjection.ts</span></div>
+          <div class="rule-meta-item"><strong>Config Setting / Disable Key</strong><span>delphisense.rules.sqlInjection</span></div>
+        </div>
+        <p>
+          <strong>Description & Objective:</strong> Identifies SQL queries constructed via direct string concatenation (<code>+</code>) with variables or UI controls, exposing the application to SQL Injection vulnerabilities. Enforces the security best practice of parameterized queries.
+        </p>
+        <p>
+          <strong>Detection Algorithm:</strong> Inspects assignments and calls to <code>.SQL.Text</code>, <code>.SQL.Add</code>, or query properties for string literals combined with non-literal variables using <code>+</code> operator.
+        </p>
+        <div class="code-comparison">
+          <div class="code-box">
+            <div class="code-box-header header-anti">⚠️ Anti-Pattern (SQL String Concatenation)</div>
+            <pre><code>Query.SQL.Text := 'SELECT * FROM Users WHERE Name = ' + Edit1.Text;</code></pre>
+          </div>
+          <div class="code-box">
+            <div class="code-box-header header-fix">✅ Recommended Parameterized Query</div>
+            <pre><code>Query.SQL.Text := 'SELECT * FROM Users WHERE Name = :Name';
+Query.ParamByName('Name').AsString := Edit1.Text;</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rule 10: hardcodedSecrets -->
+      <div class="rule-card rule-bug">
+        <div class="rule-header-row">
+          <div class="rule-title-area">
+            <span class="rule-id">hardcodedSecrets</span>
+            <span class="rule-card-title">Hardcoded Credential / Secret Detection</span>
+          </div>
+          <div class="rule-badges">
+            <span class="severity-badge sev-error" style="background:rgba(244,63,94,0.15);color:var(--accent-rose);border:1px solid rgba(244,63,94,0.3)">Error</span>
+          </div>
+        </div>
+        <div class="rule-meta-grid">
+          <div class="rule-meta-item"><strong>Category</strong><span>Security / DevSecOps</span></div>
+          <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/hardcodedSecrets.ts</span></div>
+          <div class="rule-meta-item"><strong>Config Setting / Disable Key</strong><span>delphisense.rules.hardcodedSecrets</span></div>
+        </div>
+        <p>
+          <strong>Description & Objective:</strong> Scans source units for embedded database passwords, API tokens, secret keys, or connection string credentials. Prevents security credential exposure in version control systems ("Shift-Left Security").
+        </p>
+        <p>
+          <strong>Detection Algorithm:</strong> Evaluates non-comment source lines for secret variable assignments (e.g. <code>DBPassword := '...'</code>) and connection string password parameters (<code>Password=...</code>).
+        </p>
+      </div>
+
+      <!-- Rule 11: tooManyParameters -->
+      <div class="rule-card rule-smell">
+        <div class="rule-header-row">
+          <div class="rule-title-area">
+            <span class="rule-id">tooManyParameters</span>
+            <span class="rule-card-title">Excessive Parameter List (KISS Principle)</span>
+          </div>
+          <div class="rule-badges">
+            <span class="severity-badge sev-warning">Warning</span>
+          </div>
+        </div>
+        <div class="rule-meta-grid">
+          <div class="rule-meta-item"><strong>Category</strong><span>Code Smell / KISS</span></div>
+          <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/tooManyParameters.ts</span></div>
+          <div class="rule-meta-item"><strong>Config Setting / Disable Key</strong><span>delphisense.rules.tooManyParameters</span></div>
+        </div>
+        <p>
+          <strong>Description & Objective:</strong> Flags procedure and function header declarations that accept more than 5 parameters, adhering to the Keep It Simple, Stupid (KISS) principle. Encourages refactoring parameter lists into structured records or parameter objects.
+        </p>
+        <p>
+          <strong>Detection Algorithm:</strong> Parses routine signature headers and counts total parameter declarations separated by <code>;</code> and <code>,</code> inside parentheses. If <code>count > 5</code>, a Warning finding is reported on the header line.
+        </p>
+      </div>
+
+      <!-- Rule 12: commentedOutCode -->
+      <div class="rule-card rule-smell">
+        <div class="rule-header-row">
+          <div class="rule-title-area">
+            <span class="rule-id">commentedOutCode</span>
+            <span class="rule-card-title">Commented-Out Pascal Source Code (YAGNI)</span>
+          </div>
+          <div class="rule-badges">
+            <span class="severity-badge sev-hint">Hint</span>
+          </div>
+        </div>
+        <div class="rule-meta-grid">
+          <div class="rule-meta-item"><strong>Category</strong><span>Code Smell / YAGNI</span></div>
+          <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/commentedOutCode.ts</span></div>
+          <div class="rule-meta-item"><strong>Config Setting / Disable Key</strong><span>delphisense.rules.commentedOutCode</span></div>
+        </div>
+        <p>
+          <strong>Description & Objective:</strong> Detects blocks of commented-out Pascal code (e.g. <code>// procedure ...</code>, <code>// begin</code>, <code>// if ... then</code>), encouraging developers to delete obsolete dead code and rely on Git version history (YAGNI).
+        </p>
+        <p>
+          <strong>Detection Algorithm:</strong> Identifies consecutive single-line comments containing Pascal statement keywords and assignments. Flags blocks of 2 or more consecutive commented code lines.
+        </p>
+      </div>
+
+      <!-- Rule 13: redundantBooleanComparison -->
+      <div class="rule-card rule-smell">
+        <div class="rule-header-row">
+          <div class="rule-title-area">
+            <span class="rule-id">redundantBooleanComparison</span>
+            <span class="rule-card-title">Redundant Boolean Literal Comparison</span>
+          </div>
+          <div class="rule-badges">
+            <span class="severity-badge sev-hint">Hint</span>
+          </div>
+        </div>
+        <div class="rule-meta-grid">
+          <div class="rule-meta-item"><strong>Category</strong><span>Code Smell / Readability</span></div>
+          <div class="rule-meta-item"><strong>Source File</strong><span>src/engine/builtinRules/redundantBooleanComparison.ts</span></div>
+          <div class="rule-meta-item"><strong>Config Setting / Disable Key</strong><span>delphisense.rules.redundantBooleanComparison</span></div>
+        </div>
+        <p>
+          <strong>Description & Objective:</strong> Flags redundant comparisons against boolean literals (e.g. <code>if (IsActive = True) then</code> or <code>if (IsValid = False) then</code>). Encourages clean, idiomatic boolean expressions (<code>if IsActive then</code> or <code>if not IsValid then</code>).
+        </p>
+        <p>
+          <strong>Detection Algorithm:</strong> Scans non-comment statements for boolean variable or expression equality/inequality operations against <code>True</code> or <code>False</code> literals (e.g. <code>= True</code>, <code>= False</code>, <code><> True</code>, <code><> False</code>).
+        </p>
+        <div class="code-comparison">
+          <div class="code-box">
+            <div class="code-box-header header-anti">⚠️ Anti-Pattern (Redundant = True / = False)</div>
+            <pre><code>if (IsActive = True) then
+  ProcessUser;
+
+if (IsPending = False) then
+  ExecuteTask;</code></pre>
+          </div>
+          <div class="code-box">
+            <div class="code-box-header header-fix">✅ Recommended Idiomatic Expression</div>
+            <pre><code>if IsActive then
+  ProcessUser;
+
+if not IsPending then
+  ExecuteTask;</code></pre>
+          </div>
+        </div>
       </div>
 
       <!-- Custom Rules Section -->
@@ -1390,6 +1560,7 @@ end;</code></pre>
 
       <div class="subsection-title">6.1. Multi-Target Analysis</div>
       <ul>
+        <li><strong>Analyze Selected Lines:</strong> Targeted static analysis review focused strictly on highlighted/selected code lines in the active editor. Available via right-click editor context menu and command palette.</li>
         <li><strong>Analyze Current File:</strong> Instant verification of the active editor file or context menu target.</li>
         <li><strong>Analyze Folder:</strong> Recursive scan of selected directory trees with automated noise folder exclusion.</li>
         <li><strong>Analyze Project (.dpr/.dpk):</strong> Smart resolution of project main files and referenced units.</li>

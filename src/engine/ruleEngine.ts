@@ -10,6 +10,12 @@ import { todoCommentRule } from './builtinRules/todoComment';
 import { deepNestingRule } from './builtinRules/deepNesting';
 import { deadCodeAfterExitRule } from './builtinRules/deadCodeAfterExit';
 import { longLineRule } from './builtinRules/longLine';
+import { resourceLeakMissingTryFinallyRule } from './builtinRules/resourceLeakMissingTryFinally';
+import { sqlInjectionRule } from './builtinRules/sqlInjection';
+import { hardcodedSecretsRule } from './builtinRules/hardcodedSecrets';
+import { tooManyParametersRule } from './builtinRules/tooManyParameters';
+import { commentedOutCodeRule } from './builtinRules/commentedOutCode';
+import { redundantBooleanComparisonRule } from './builtinRules/redundantBooleanComparison';
 
 export const BUILTIN_RULES: Rule[] = [
   unusedUsesRule,
@@ -19,6 +25,12 @@ export const BUILTIN_RULES: Rule[] = [
   deepNestingRule,
   deadCodeAfterExitRule,
   longLineRule,
+  resourceLeakMissingTryFinallyRule,
+  sqlInjectionRule,
+  hardcodedSecretsRule,
+  tooManyParametersRule,
+  commentedOutCodeRule,
+  redundantBooleanComparisonRule,
 ];
 
 export interface AnalysisResult {
@@ -28,6 +40,7 @@ export interface AnalysisResult {
   rulesRun: string[];
   durationMs: number;
   totalLines: number;
+  fileDetails?: Record<string, { lineCount: number }>;
 }
 
 export interface AnalysisOptions {
@@ -49,6 +62,7 @@ export function analyzeFiles(filePaths: string[], options: AnalysisOptions): Ana
 
   const findings: Finding[] = [];
   const analyzedFiles: string[] = [];
+  const fileDetails: Record<string, { lineCount: number }> = {};
   let totalLines = 0;
 
   for (const filePath of filePaths) {
@@ -56,7 +70,9 @@ export function analyzeFiles(filePaths: string[], options: AnalysisOptions): Ana
       const source = fs.readFileSync(filePath, 'utf8');
       const unit: ParsedUnit = analyzeStructure(filePath, source);
       analyzedFiles.push(filePath);
-      totalLines += unit.lines.length;
+      const lineCount = unit.lines.length;
+      totalLines += lineCount;
+      fileDetails[filePath] = { lineCount };
 
       for (const rule of allRules) {
         try {
@@ -81,5 +97,6 @@ export function analyzeFiles(filePaths: string[], options: AnalysisOptions): Ana
     rulesRun: allRules.map((r) => r.id),
     durationMs: Date.now() - start,
     totalLines,
+    fileDetails,
   };
 }

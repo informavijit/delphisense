@@ -10,7 +10,7 @@ import { generateHtmlReport } from './report';
 import { publishDiagnostics, getDiagnosticCollection } from './diagnostics';
 import { EXAMPLE_CUSTOM_RULES_FILE } from './engine/customRules';
 
-const EXTENSION_VERSION = '1.0.0';
+const EXTENSION_VERSION = '1.0.1';
 
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(getDiagnosticCollection());
@@ -18,6 +18,9 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand('delphisense.analyzeFile', (uri?: vscode.Uri) =>
       handleAnalyzeFile(uri)
+    ),
+    vscode.commands.registerCommand('delphisense.analyzeSelection', () =>
+      handleAnalyzeSelection()
     ),
     vscode.commands.registerCommand('delphisense.analyzeFolder', (uri?: vscode.Uri) =>
       handleAnalyzeFolder(uri)
@@ -34,6 +37,38 @@ export function deactivate() {
 }
 
 // ---------- command handlers ----------
+
+async function handleAnalyzeSelection() {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    vscode.window.showWarningMessage('DelphiSense: open a Delphi source file (.pas) and select lines to analyze.');
+    return;
+  }
+
+  const filePath = editor.document.uri.fsPath;
+  const ext = path.extname(filePath).toLowerCase();
+  if (ext !== '.pas' && ext !== '.pp' && ext !== '.inc') {
+    vscode.window.showWarningMessage('DelphiSense: active file is not a Delphi/Pascal source file.');
+    return;
+  }
+
+  const selection = editor.selection;
+  const startLine = selection.start.line + 1; // 1-based
+  const endLine = selection.end.line + 1;
+
+  if (selection.isEmpty) {
+    vscode.window.showInformationMessage(`DelphiSense: Analyzing active file line ${startLine}…`);
+  }
+
+  const target: AnalysisTarget = {
+    kind: 'selection',
+    label: `${path.basename(filePath)} (Lines ${startLine}-${endLine})`,
+    rootPath: filePath,
+    lineRange: { startLine, endLine },
+  };
+
+  await runAnalysisWithProgress(target);
+}
 
 async function handleAnalyzeFile(uri?: vscode.Uri) {
   const filePath = uri?.fsPath ?? vscode.window.activeTextEditor?.document.uri.fsPath;
@@ -144,6 +179,11 @@ async function runAnalysisWithProgress(target: AnalysisTarget) {
 
       const result = analyzeFiles(files, { config, customRulesFilePath });
 
+      if (target.lineRange) {
+        const { startLine, endLine } = target.lineRange;
+        result.findings = result.findings.filter((f) => f.line >= startLine && f.line <= endLine);
+      }
+
       progress.report({ message: 'Publishing diagnostics…' });
       publishDiagnostics(result.findings);
 
@@ -169,11 +209,36 @@ async function runAnalysisWithProgress(target: AnalysisTarget) {
 
 function readConfig(): DelphiSenseConfig {
   const cfg = vscode.workspace.getConfiguration('delphisense');
+  const disabledSet = new Set<string>(cfg.get<string[]>('rules.disabled', []));
+
+  const knownRules = [
+    'unusedUses',
+    'longMethod',
+    'emptyExceptFinally',
+    'todoComment',
+    'deepNesting',
+    'deadCodeAfterExit',
+    'longLine',
+    'resourceLeakMissingTryFinally',
+    'sqlInjection',
+    'hardcodedSecrets',
+    'tooManyParameters',
+    'commentedOutCode',
+    'redundantBooleanComparison',
+  ];
+
+  for (const ruleId of knownRules) {
+    const isEnabled = cfg.get<boolean>(`rules.${ruleId}`, true);
+    if (!isEnabled) {
+      disabledSet.add(ruleId);
+    }
+  }
+
   return {
     longMethodMaxLines: cfg.get<number>('longMethod.maxLines', 60),
     deepNestingMaxDepth: cfg.get<number>('deepNesting.maxDepth', 4),
     maxLineLength: cfg.get<number>('maxLineLength.max', 120),
-    disabledRules: cfg.get<string[]>('rules.disabled', []),
+    disabledRules: Array.from(disabledSet),
   };
 }
 

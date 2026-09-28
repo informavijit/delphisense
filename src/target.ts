@@ -1,12 +1,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-export type TargetKind = 'file' | 'folder' | 'dpr' | 'workspace';
+export type TargetKind = 'file' | 'folder' | 'dpr' | 'workspace' | 'selection';
 
 export interface AnalysisTarget {
   kind: TargetKind;
   label: string;      // human-readable name for report title
   rootPath: string;    // file, folder, or dpr path
+  lineRange?: { startLine: number; endLine: number }; // 1-based line range for selection review
 }
 
 const PASCAL_EXTENSIONS = new Set(['.pas', '.pp', '.inc']);
@@ -16,6 +17,7 @@ const IGNORED_DIRS = new Set(['.git', '.svn', 'node_modules', '__history', '__re
 export function resolveTargetFiles(target: AnalysisTarget): string[] {
   switch (target.kind) {
     case 'file':
+    case 'selection':
       return [target.rootPath];
     case 'folder':
       return walkFolder(target.rootPath);

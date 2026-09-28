@@ -27,7 +27,8 @@ export interface ReportMeta {
 
 export function generateHtmlReport(result: AnalysisResult, meta: ReportMeta): string {
   const counts = countBySeverity(result.findings);
-  const byCategory = countByCategory(result.findings);
+  const categoryStats = countByCategoryDetails(result.findings);
+  const ruleStats = countByRuleDetails(result.findings);
   const byFile = groupByFile(result.findings);
   const qualityScore = computeQualityScore(result, counts);
 
@@ -44,8 +45,9 @@ ${CSS}
   <div class="ds-container">
     ${renderHeader(meta, result)}
     ${renderSummaryCards(counts, result, qualityScore)}
-    ${renderCategoryBreakdown(byCategory)}
-    ${renderFileSummaryTable(byFile)}
+    ${renderCategoryBreakdown(categoryStats, result.findings.length, result.totalLines)}
+    ${renderRuleSummaryTable(ruleStats, result.findings.length)}
+    ${renderFileSummaryTable(result, byFile)}
     ${renderFindingsSections(byFile)}
     ${renderFooter(meta)}
   </div>
@@ -68,6 +70,7 @@ function renderHeader(meta: ReportMeta, result: AnalysisResult): string {
       <div class="ds-meta-row"><span>Generated</span><strong>${formatDate(meta.generatedAt)}</strong></div>
       <div class="ds-meta-row"><span>Target type</span><strong>${capitalize(meta.target.kind)}</strong></div>
       <div class="ds-meta-row"><span>Files analyzed</span><strong>${result.unitsAnalyzed}</strong></div>
+      <div class="ds-meta-row"><span>Total LOC</span><strong>${result.totalLines.toLocaleString()} lines</strong></div>
       <div class="ds-meta-row"><span>Duration</span><strong>${result.durationMs} ms</strong></div>
       <div class="ds-meta-row"><span>DelphiSense</span><strong>v${escapeHtml(meta.toolVersion)}</strong></div>
     </div>
@@ -100,32 +103,50 @@ function renderSummaryCards(
     </div>`
     ).join('')}
     <div class="ds-stat-card">
+      <div class="ds-stat-value">${result.totalLines.toLocaleString()}</div>
+      <div class="ds-stat-label">Total LOC</div>
+    </div>
+    <div class="ds-stat-card">
       <div class="ds-stat-value">${result.unitsAnalyzed}</div>
       <div class="ds-stat-label">Files Scanned</div>
     </div>
   </section>`;
 }
 
-function renderCategoryBreakdown(byCategory: Record<string, number>): string {
-  const entries = Object.entries(byCategory).filter(([, count]) => count > 0);
-  if (entries.length === 0) return '';
-  const max = Math.max(...entries.map(([, c]) => c));
+interface CategoryDetail {
+  category: FindingCategory;
+  total: number;
+  error: number;
+  warning: number;
+  hint: number;
+}
+
+function renderCategoryBreakdown(categories: CategoryDetail[], totalFindings: number, totalLoc: number): string {
+  if (categories.length === 0) return '';
 
   return `
   <section class="ds-section">
-    <h2>Findings by Category</h2>
-    <div class="ds-bars">
-      ${entries
-        .map(([cat, count]) => {
-          const color = CATEGORY_COLORS[cat as FindingCategory] ?? '#666';
-          const widthPct = Math.max(4, Math.round((count / max) * 100));
+    <h2>Summary: Findings by Rule Category</h2>
+    <div class="ds-category-grid">
+      ${categories
+        .map((c) => {
+          const color = CATEGORY_COLORS[c.category] ?? '#555';
+          const pct = totalFindings > 0 ? Math.round((c.total / totalFindings) * 100) : 0;
+          const density = totalLoc > 0 ? ((c.total / totalLoc) * 100).toFixed(1) : '0';
           return `
-      <div class="ds-bar-row">
-        <div class="ds-bar-label">${escapeHtml(cat)}</div>
-        <div class="ds-bar-track">
-          <div class="ds-bar-fill" style="width:${widthPct}%;background:${color}"></div>
+      <div class="ds-cat-card" style="border-left-color: ${color}">
+        <div class="ds-cat-header">
+          <span class="ds-cat-title" style="color:${color}">${escapeHtml(c.category)}</span>
+          <span class="ds-cat-count">${c.total} (${pct}% &middot; ${density}/100 LOC)</span>
         </div>
-        <div class="ds-bar-count">${count}</div>
+        <div class="ds-bar-track" style="margin: 8px 0 10px;">
+          <div class="ds-bar-fill" style="width:${Math.max(5, pct)}%;background:${color}"></div>
+        </div>
+        <div class="ds-cat-badges">
+          ${c.error > 0 ? `<span class="ds-mini-badge ds-sev-error">${c.error} error${c.error > 1 ? 's' : ''}</span>` : ''}
+          ${c.warning > 0 ? `<span class="ds-mini-badge ds-sev-warning">${c.warning} warning${c.warning > 1 ? 's' : ''}</span>` : ''}
+          ${c.hint > 0 ? `<span class="ds-mini-badge ds-sev-hint">${c.hint} hint${c.hint > 1 ? 's' : ''}</span>` : ''}
+        </div>
       </div>`;
         })
         .join('')}
@@ -133,8 +154,57 @@ function renderCategoryBreakdown(byCategory: Record<string, number>): string {
   </section>`;
 }
 
-function renderFileSummaryTable(byFile: Map<string, Finding[]>): string {
-  if (byFile.size === 0) {
+interface RuleDetail {
+  ruleId: string;
+  category: FindingCategory;
+  total: number;
+  error: number;
+  warning: number;
+  hint: number;
+}
+
+function renderRuleSummaryTable(rules: RuleDetail[], totalFindings: number): string {
+  if (rules.length === 0) return '';
+
+  const rows = rules
+    .sort((a, b) => b.total - a.total || a.ruleId.localeCompare(b.ruleId))
+    .map((r) => {
+      const pct = totalFindings > 0 ? Math.round((r.total / totalFindings) * 100) : 0;
+      const catColor = CATEGORY_COLORS[r.category] ?? '#555';
+      return `
+      <tr>
+        <td class="ds-rule-id"><strong>${escapeHtml(r.ruleId)}</strong></td>
+        <td><span class="ds-category-chip" style="border-color:${catColor};color:${catColor}">${escapeHtml(r.category)}</span></td>
+        <td class="ds-num ds-sev-error">${r.error || '-'}</td>
+        <td class="ds-num ds-sev-warning">${r.warning || '-'}</td>
+        <td class="ds-num ds-sev-hint">${r.hint || '-'}</td>
+        <td class="ds-num ds-total-col">${r.total} (${pct}%)</td>
+      </tr>`;
+    })
+    .join('');
+
+  return `
+  <section class="ds-section">
+    <h2>Summary: Rule-wise Findings Count</h2>
+    <table class="ds-table">
+      <thead>
+        <tr>
+          <th>Rule ID</th>
+          <th>Category</th>
+          <th>Errors</th>
+          <th>Warnings</th>
+          <th>Hints</th>
+          <th>Total Count</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </section>`;
+}
+
+function renderFileSummaryTable(result: AnalysisResult, byFile: Map<string, Finding[]>): string {
+  const filesList = result.filesAnalyzed.length > 0 ? result.filesAnalyzed : Array.from(byFile.keys());
+  if (filesList.length === 0) {
     return `
   <section class="ds-section">
     <h2>File Summary</h2>
@@ -142,28 +212,32 @@ function renderFileSummaryTable(byFile: Map<string, Finding[]>): string {
   </section>`;
   }
 
-  const rows = Array.from(byFile.entries())
-    .sort((a, b) => b[1].length - a[1].length)
-    .map(([file, findings]) => {
+  const rows = filesList
+    .map((file) => {
+      const findings = byFile.get(file) || [];
       const counts = countBySeverity(findings);
-      return `
+      const loc = result.fileDetails?.[file]?.lineCount ?? 0;
+      return { file, findings, counts, loc };
+    })
+    .sort((a, b) => b.findings.length - a.findings.length || b.loc - a.loc)
+    .map(({ file, findings, counts, loc }) => `
       <tr>
         <td class="ds-file-cell" title="${escapeHtml(file)}">${escapeHtml(shortenPath(file))}</td>
-        <td class="ds-num ds-sev-error">${counts.error || ''}</td>
-        <td class="ds-num ds-sev-warning">${counts.warning || ''}</td>
-        <td class="ds-num ds-sev-hint">${counts.hint || ''}</td>
-        <td class="ds-num ds-total-col">${findings.length}</td>
-        <td><a href="#file-${slugify(file)}">Jump to detail &rarr;</a></td>
-      </tr>`;
-    })
+        <td class="ds-num">${loc > 0 ? loc.toLocaleString() : '-'}</td>
+        <td class="ds-num ds-sev-error">${counts.error || '-'}</td>
+        <td class="ds-num ds-sev-warning">${counts.warning || '-'}</td>
+        <td class="ds-num ds-sev-hint">${counts.hint || '-'}</td>
+        <td class="ds-num ds-total-col">${findings.length > 0 ? findings.length : '<span style="color:#2a9d4f;font-weight:600">Clean</span>'}</td>
+        <td>${findings.length > 0 ? `<a href="#file-${slugify(file)}">Jump to detail &rarr;</a>` : ''}</td>
+      </tr>`)
     .join('');
 
   return `
   <section class="ds-section">
-    <h2>File Summary</h2>
+    <h2>File Summary (LOC & Findings)</h2>
     <table class="ds-table">
       <thead>
-        <tr><th>File</th><th>Errors</th><th>Warnings</th><th>Hints</th><th>Total</th><th></th></tr>
+        <tr><th>File</th><th>LOC</th><th>Errors</th><th>Warnings</th><th>Hints</th><th>Total</th><th></th></tr>
       </thead>
       <tbody>${rows}</tbody>
     </table>
@@ -223,10 +297,30 @@ function countBySeverity(findings: Finding[]): Record<Severity, number> {
   return counts;
 }
 
-function countByCategory(findings: Finding[]): Record<string, number> {
-  const counts: Record<string, number> = {};
-  for (const f of findings) counts[f.category] = (counts[f.category] || 0) + 1;
-  return counts;
+function countByCategoryDetails(findings: Finding[]): CategoryDetail[] {
+  const map = new Map<FindingCategory, CategoryDetail>();
+  for (const f of findings) {
+    if (!map.has(f.category)) {
+      map.set(f.category, { category: f.category, total: 0, error: 0, warning: 0, hint: 0 });
+    }
+    const entry = map.get(f.category)!;
+    entry.total++;
+    entry[f.severity]++;
+  }
+  return Array.from(map.values()).sort((a, b) => b.total - a.total);
+}
+
+function countByRuleDetails(findings: Finding[]): RuleDetail[] {
+  const map = new Map<string, RuleDetail>();
+  for (const f of findings) {
+    if (!map.has(f.ruleId)) {
+      map.set(f.ruleId, { ruleId: f.ruleId, category: f.category, total: 0, error: 0, warning: 0, hint: 0 });
+    }
+    const entry = map.get(f.ruleId)!;
+    entry.total++;
+    entry[f.severity]++;
+  }
+  return Array.from(map.values());
 }
 
 function groupByFile(findings: Finding[]): Map<string, Finding[]> {
@@ -328,7 +422,7 @@ body {
 
 .ds-summary {
   display: grid;
-  grid-template-columns: 140px repeat(4, 1fr);
+  grid-template-columns: 140px repeat(5, 1fr);
   gap: 14px;
   margin-bottom: 28px;
 }
@@ -372,9 +466,27 @@ body {
 }
 .ds-section h2 { font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ds-muted); margin: 0 0 16px; }
 
+.ds-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+.ds-cat-card {
+  background: #fafafa;
+  border: 1px solid var(--ds-border);
+  border-left: 4px solid var(--ds-accent);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.ds-cat-header { display: flex; justify-content: space-between; align-items: center; }
+.ds-cat-title { font-weight: 700; font-size: 14px; }
+.ds-cat-count { font-weight: 600; font-size: 12.5px; color: var(--ds-muted); }
+.ds-cat-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.ds-mini-badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 600; background: #eef0f3; }
+
 .ds-bars { display: flex; flex-direction: column; gap: 10px; }
 .ds-bar-row { display: grid; grid-template-columns: 140px 1fr 40px; align-items: center; gap: 10px; font-size: 13px; }
-.ds-bar-track { background: #eef0f3; border-radius: 6px; height: 14px; overflow: hidden; }
+.ds-bar-track { background: #eef0f3; border-radius: 6px; height: 10px; overflow: hidden; }
 .ds-bar-fill { height: 100%; border-radius: 6px; }
 .ds-bar-count { text-align: right; font-weight: 600; }
 
