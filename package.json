@@ -2,7 +2,7 @@
   "name": "delphisense",
   "displayName": "DelphiSense — Delphi Code Review",
   "description": "Free, lightweight code-review and static-analysis extension for Embarcadero Delphi / Object Pascal. Works on any Delphi version. Generates professional HTML review reports.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "publisher": "AvijitKumarTewary",
   "license": "MIT",
   "icon": "resources/icon.png",

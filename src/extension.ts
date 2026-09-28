@@ -10,7 +10,7 @@ import { generateHtmlReport } from './report';
 import { publishDiagnostics, getDiagnosticCollection } from './diagnostics';
 import { EXAMPLE_CUSTOM_RULES_FILE } from './engine/customRules';
 
-const EXTENSION_VERSION = '1.0.1';
+const EXTENSION_VERSION = '1.0.2';
 
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(getDiagnosticCollection());
@@ -54,7 +54,11 @@ async function handleAnalyzeSelection() {
 
   const selection = editor.selection;
   const startLine = selection.start.line + 1; // 1-based
-  const endLine = selection.end.line + 1;
+  let endLine = selection.end.line + 1;
+
+  if (!selection.isEmpty && selection.end.character === 0 && selection.end.line > selection.start.line) {
+    endLine = selection.end.line;
+  }
 
   if (selection.isEmpty) {
     vscode.window.showInformationMessage(`DelphiSense: Analyzing active file line ${startLine}…`);
@@ -182,6 +186,13 @@ async function runAnalysisWithProgress(target: AnalysisTarget) {
       if (target.lineRange) {
         const { startLine, endLine } = target.lineRange;
         result.findings = result.findings.filter((f) => f.line >= startLine && f.line <= endLine);
+        const selectedLineCount = Math.max(1, endLine - startLine + 1);
+        result.totalLines = selectedLineCount;
+        if (result.fileDetails) {
+          for (const key of Object.keys(result.fileDetails)) {
+            result.fileDetails[key].lineCount = selectedLineCount;
+          }
+        }
       }
 
       progress.report({ message: 'Publishing diagnostics…' });
